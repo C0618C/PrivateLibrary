@@ -1,0 +1,7 @@
+node_modules
+download
+rule.json
+.sln
+
+backup/*
+todo.md

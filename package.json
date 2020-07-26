@@ -1,0 +1,31 @@
+{
+  "name": "privatelibrary",
+  "version": "1.0.0",
+  "description": "增强连载小说阅读体验的工具，打造个人书库",
+  "main": "start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node start.js",
+    "install": "node install.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/C0618C/PrivateLibrary.git"
+  },
+  "keywords": [
+    "book"
+  ],
+  "author": "c0618c",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/C0618C/PrivateLibrary/issues"
+  },
+  "homepage": "https://github.com/C0618C/PrivateLibrary#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
+    "got": "^11.5.1",
+    "iconv-lite": "^0.6.2",
+    "socket.io": "^2.3.0"
+  }
+}

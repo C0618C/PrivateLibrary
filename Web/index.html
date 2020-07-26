@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+    <script src="/script/api" type="text/javascript"></script>
+    <title>小说下载</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row" style="margin-top: 20px;">
+            <div class="col align-self-center">
+                <h1 class="h1 text-center">小说下载</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+
+            </div>
+            <div class="col-sm">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="https://" aria-label="https://"
+                        aria-describedby="button-addon2" id="url">
+                    <div class="input-group-append" style="width: 80px;">
+                        <button class="btn btn-outline-secondary btn-block" type="button" id="button-addon2">载入</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+
+            </div>
+        </div>
+        <div class="row justify-content-md-center" id="solution_list">
+
+
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var socket = io();
+            //加载已有项目
+            LoadSolution();
+
+            let loading_index_url;
+
+            $('#button-addon2').click(function (e) {
+                loading_index_url = $('#url').val()
+                socket.emit('Novel/LoadIndex', loading_index_url);
+            });
+
+            socket.on('Novel/LoadIndex/Finish', function (msg) {
+                LoadSolution();
+            });
+            socket.on('Novel/LoadIndex/Fail', function (url, msg) {
+                if (loading_index_url == url) {
+                    Alert(msg, "爬取目录失败：");
+                    window.open("/setting#rulesetting");
+                }
+            });
+
+            $("#solution_list").on("click", "a.deleteNovel", (e) => {
+                let id = $(e.target).nextAll("input[name=novel_id]").val();
+                let isDelFile = false;
+                DeleteNovel(id, isDelFile, (isOK) => {
+                    if (isOK) $("input[value=" + id + "]").closest(".card").remove();
+                })
+            });
+            $("#solution_list").on("click", "a.updateIndex", (e) => {
+                let id = $(e.target).nextAll("input[name=novel_id]").val();
+                ReloadIndex(id, false, (result) => {
+                    console.log(result);
+                    Success("书籍已更新");
+                });
+            });
+        });
+
+        function LoadSolution() {
+            $.ajax({
+                url: "/api/solution/getitems", dataType: "json",
+                success: (result) => {
+                    if (!result || result.length == 0) return;
+                    let itemCard = "";
+                    for (let item of result) {
+                        itemCard += `
+            <div class="card shadow-sm" style="width: 18rem;margin:2px 5px;">
+                <div class="card-body">
+                  <h5 class="card-title">${item.title}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">最近后更新：${new Date(item.time).toLocaleDateString()}</h6>
+                  <p class="card-text">&nbsp;<span class="float-left">共${item.count}章</span><cite class="float-right"><a href="${item.url}" target="_blank">查看源</a></cite></p>
+                  <div class="float-none">
+                  <a href="/item/${item.id}" class="card-link">进入</a>
+                  <a href="#" class="card-link updateIndex">更新目录</a>
+                  <a href="#" class="card-link deleteNovel" >删除记录</a>
+                  <input type="hidden" name="novel_id" value="${item.id}" />
+                </div></div>
+            </div>`
+                    }
+                    $("#solution_list").html(itemCard);
+                }
+            });
+        }
+    </script>
+</body>
+
+
+</html>

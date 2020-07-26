@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+    <script src="/script/api" type="text/javascript"></script>
+    <title>规则设置</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row container-fluid p-0 m-0">
+            <div class="col-2 p-0 " id="web_list">
+                <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"><span
+                        class="sr-only">Loading...</span></div>
+            </div>
+            <div class="col flex-grow-1">
+                <form id="setting_form">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <button type="button" class="btn btn-success" id="btn_save">保存</button>
+                            <button type="button" class="btn btn-danger" id="btn_delete">删除</button>
+                            <button type="button" class="btn btn-primary" id="btn_copy">从当前复制</button>
+                            <button type="button" class="btn btn-primary" id="btn_default">载入默认</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            全站规则
+                        </div>
+                        <div class="card-body">
+                            <blockquote class="blockquote mb-0">
+                                <div class="form-group row" id="web_url">
+                                    <label for="website_url" class="col-sm-2 col-form-label">网站地址</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" placeholder="网站的任意页面" id="website_url"
+                                            disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="encoding" class="col-sm-2 col-form-label">字符编码</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="encoding">
+                                            <option>utf-8</option>
+                                            <option>gbk</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            目录页设置
+                        </div>
+                        <div class="card-body">
+                            <blockquote class="blockquote mb-0">
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">小说名称</label>
+                                    <div class="col-sm-10">
+                                        <div class="form-row">
+                                            <div class="col-2">
+                                                <select class="form-control" id="index_page_title_type">
+                                                    <option disabled>选择器类型</option>
+                                                    <option>querySelector</option>
+                                                    <option>regexp</option>
+                                                    <option>xpath</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="index_page_title_selector">选择器规则</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="选择器规则"
+                                                        id="index_page_title_selector">
+                                                </div>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="index_page_title_text">获取文本</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="获取文本"
+                                                        id="index_page_title_text">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">章节列表</label>
+                                    <div class="col-sm-10">
+                                        <div class="form-row">
+                                            <div class="col-2">
+                                                <select class="form-control" id="index_page_chapters_type">
+                                                    <option disabled>选择器类型</option>
+                                                    <option>querySelector</option>
+                                                    <option>regexp</option>
+                                                    <option>xpath</option>
+                                                </select>
+                                            </div>
+                                            <div class="col">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="index_page_chapters_selector">选择器规则</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="选择器规则"
+                                                        id="index_page_chapters_selector">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="index_page_chapters_text">获取文本</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="获取文本"
+                                                        id="index_page_chapters_text">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="index_page_chapters_url">获取地址</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="获取地址"
+                                                        id="index_page_chapters_url">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            正文页设置
+                        </div>
+                        <div class="card-body">
+                            <blockquote class="blockquote mb-0">
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">章节标题</label>
+                                    <div class="col-sm-10">
+                                        <div class="form-row">
+                                            <div class="col-2">
+                                                <select class="form-control" id="content_page_title_type">
+                                                    <option disabled>选择器类型</option>
+                                                    <option>querySelector</option>
+                                                    <option>regexp</option>
+                                                    <option>xpath</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="content_page_title_selector">选择器规则</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="选择器规则"
+                                                        id="content_page_title_selector">
+                                                </div>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="content_page_title_text">获取文本</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="获取文本"
+                                                        id="content_page_title_text">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">文章正文</label>
+                                    <div class="col-sm-10">
+                                        <div class="form-row">
+                                            <div class="col-2">
+                                                <select class="form-control" id="content_page_content_type">
+                                                    <option disabled>选择器类型</option>
+                                                    <option>querySelector</option>
+                                                    <option>regexp</option>
+                                                    <option>xpath</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="content_page_content_selector">选择器规则</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="选择器规则"
+                                                        id="content_page_content_selector">
+                                                </div>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="content_page_content_text">获取文本</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="获取文本"
+                                                        id="content_page_content_text">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card">
+                    <div class="card-header">
+                        填写帮助
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0">
+                            <dl class="row">
+                                <dt class="col-sm-2">选择器</dt>
+                                <dd class="col-sm-10">本工具通过加载指定URL的源码，用选择器解释选择器规则，定位到需提取的内容，再通过预定的方法，提取对应的文本，实现文章的下载。
+                                </dd>
+                                <dt class="col-sm-2">选择器类型</dt>
+                                <dd class="col-sm-10">
+                                    <dl class="row">
+                                        <dt class="col-sm-3">querySelector</dt>
+                                        <dd class="col-sm-9">类Query Selector的选择器，因为通过node-cheerio实现，可查阅对应文档确认支持的选择器类型。
+                                        </dd>
+                                        <dt class="col-sm-3">regexp</dt>
+                                        <dd class="col-sm-9">正则表达是形式的选择器</dd>
+                                        <dt class="col-sm-3">xpath</dt>
+                                        <dd class="col-sm-9">通过xpath规则定位</dd>
+                                    </dl>
+                                </dd>
+                                <dt class="col-sm-2">选择器规则</dt>
+                                <dd class="col-sm-10">定位到目标内容需要执行的选择器规则，如qs需要提供qs选择器；regexp则需要提供正则表达式。</dd>
+                                <dt class="col-sm-2">获取文本</dt>
+                                <dd class="col-sm-10">定位到目标对象时，通过何种方式获取到所需文本，不同选择器类型支持的获取方式规则不一样。</dd>
+                                <dt class="col-sm-2">获取地址</dt>
+                                <dd class="col-sm-10">与获取文本相同，指定如何获取超链接的地址。</dd>
+                            </dl>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            let myRules;
+            GetRuleSetting((rules) => {
+                let item = [`<a href="#add" class="list-group-item list-group-item-action text-center"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-file-earmark-plus" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5v-1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5v2.5A1.5 1.5 0 0 0 10.5 6H13v2h1V6L9 1z"/>
+  <path fill-rule="evenodd" d="M13.5 10a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1H13v-1.5a.5.5 0 0 1 .5-.5z"/>
+  <path fill-rule="evenodd" d="M13 12.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0v-2z"/></svg></a>`];
+                for (let w in rules) {
+                    item.push(`<a href="#${w}" class="list-group-item list-group-item-action text-truncate">${w}</a>`);
+                }
+                $("#web_list").empty().append(`<ul class="list-group">`, item, "</ul>");
+                myRules = rules;
+                Rule2Form(location.hash, myRules);
+            });
+
+            $("#btn_save").on("click", () => {
+                Form2Rule(myRules);
+                UpdateRuleSetting(myRules, () => {
+                    Success("更新成功！");
+                });
+            });
+            $("#btn_delete").on("click", () => {
+                delete myRules[$("#website_url").val()];
+                UpdateRuleSetting(myRules, () => {
+                    Success("删除成功！");
+                });
+            });
+            $("#btn_copy").on("click", () => {
+                $("#website_url").val("").prop("disabled", false);
+            });
+
+            $(window).on("hashchange", () => {
+                Rule2Form(location.hash, myRules);
+            });
+        });
+        function Rule2Form(name, rules) {
+            $("#setting_form")[0].reset();
+            name = name.replace("#", "");
+            let url = $("#website_url");
+            if (name == "add") {
+                url.prop("disabled", false);
+                return;
+            }
+            url.val(name);
+            url.prop("disabled", true);
+            let rule = rules[name];
+            if (!rule) return;
+            if (rule.encoding) $("#encoding").val(rule.encoding);
+            if (rule.index_page) {
+                if (rule.index_page.title) {
+                    if (rule.index_page.title.type) $("#index_page_title_type").val(rule.index_page.title.type);
+                    if (rule.index_page.title.selector) $("#index_page_title_selector").val(rule.index_page.title.selector);
+                    if (rule.index_page.title.text) $("#index_page_title_text").val(rule.index_page.title.text);
+                }
+                if (rule.index_page.chapters) {
+                    if (rule.index_page.chapters.type) $("#index_page_chapters_type").val(rule.index_page.chapters.type);
+                    if (rule.index_page.chapters.selector) $("#index_page_chapters_selector").val(rule.index_page.chapters.selector);
+                    if (rule.index_page.chapters.text) $("#index_page_chapters_text").val(rule.index_page.chapters.text);
+                    if (rule.index_page.chapters.url) $("#index_page_chapters_url").val(rule.index_page.chapters.url);
+                }
+            }
+            if (rule.content_page) {
+                if (rule.content_page.title) {
+                    if (rule.content_page.title.type) $("#content_page_title_type").val(rule.content_page.title.type);
+                    if (rule.content_page.title.selector) $("#content_page_title_selector").val(rule.content_page.title.selector);
+                    if (rule.content_page.title.text) $("#content_page_title_text").val(rule.content_page.title.text);
+                }
+                if (rule.content_page.content) {
+                    if (rule.content_page.content.type) $("#content_page_content_type").val(rule.content_page.content.type);
+                    if (rule.content_page.content.selector) $("#content_page_content_selector").val(rule.content_page.content.selector);
+                    if (rule.content_page.content.text) $("#content_page_content_text").val(rule.content_page.content.text);
+                }
+            }
+        }
+        function Form2Rule(rules) {
+            let url = $("#website_url").val();
+            let name = GetHost(url);
+            rules[name] = {
+                "encoding": $("#encoding").val(),
+                "index_page": {
+                    "title": {
+                        "type": $("#index_page_title_type").val(),
+                        "selector": $("#index_page_title_selector").val(),
+                        "text": $("#index_page_title_text").val()
+                    },
+                    "chapters": {
+                        "type": $("#index_page_chapters_type").val(),
+                        "selector": $("#index_page_chapters_selector").val(),
+                        "url": $("#index_page_chapters_url").val(),
+                        "text": $("#index_page_chapters_text").val()
+                    }
+                },
+                "content_page": {
+                    "title": {
+                        "type": $("#content_page_title_type").val(),
+                        "selector": $("#content_page_title_selector").val(),
+                        "text": $("#content_page_title_text").val()
+                    },
+                    "content": {
+                        "type": $("#content_page_content_type").val(),
+                        "selector": $("#content_page_content_selector").val(),
+                        "text": $("#content_page_content_text").val()
+                    }
+                }
+            };
+
+            console.log(JSON.stringify(rules));
+        }
+
+        function GetHost(url) {
+            url = url.replace(/https?:\/\//, "");
+            return url.indexOf("/") == -1 ? url : url.substr(0, url.indexOf("/"));
+        }
+    </script>
+</body>
+
+
+</html>

@@ -1,0 +1,99 @@
+const bodyParser = require('body-parser');
+
+const WebRoot = __dirname + "/Web";
+
+exports.Init = function (servers, NovelLibrary) {
+    let web = servers.webServer;
+    // 创建 application/x-www-form-urlencoded 编码解析
+    var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+    web.get("/", (req, res) => {
+        res.sendFile(WebRoot + '/index.html');
+    });
+    web.get("/script/:filename", (req, res) => {
+        res.sendFile(WebRoot + `/script/${req.params.filename}.js`);
+    });
+    web.get("/page/:filename", (req, res) => {
+        res.sendFile(WebRoot + `/${req.params.filename}.html`);
+    });
+
+    /*** Web服务 ***/
+    //具体某个小说页
+    web.get("/item/:id", (req, res) => {
+        res.sendFile(WebRoot + "/item.html");
+    });
+    //具体某个小说页
+    web.route("/read/:novelid/:cachefile/(:curfile?)").get((req, res) => {
+        res.sendFile(WebRoot + "/reading.html");
+    }).post((req, res) => {
+        res.send(NovelLibrary.Solution.GetNovelForReading(req.params.novelid, req.params.cachefile, req.params.curfile));
+    });
+
+    //系统设置页
+    web.get("/setting", (req, res) => {
+        res.sendFile(WebRoot + "/setting.html");
+    });
+
+
+
+
+    /*** 提供的API ***/
+
+    {    /** 针对书库的API **/
+        //首页加载书库所有书籍
+        web.get("/api/solution/getitems", (req, res) => {
+            res.send(JSON.stringify(NovelLibrary.Solution.GetItems()));
+        });
+
+        //删除书库中的某本书
+        web.delete("/api/solution/deleteitem", urlencodedParser, (req, res) => {
+            res.send(NovelLibrary.Solution.DeleteItem(req.body.id));
+        });
+    }
+
+
+    {    /** 单本书籍的API **/
+        //缓存某个地址
+        web.post("/api/novel/load", urlencodedParser, (req, res) => {
+            res.send(NovelLibrary.Load(req.body.url));//是否更新/读缓存
+        });
+
+        //读取某个小说目录
+        web.post("/api/novel/index", urlencodedParser, (req, res) => {
+            let cache = req.body.isUseCache == "true";
+            res.send(NovelLibrary.Solution.GetNoevlIndex(req.body.id.split("#")[0], cache));
+        });
+    }
+
+    {   /** 其它API **/
+        web.route("/api/webside/rule")
+            .get((req, res) => {
+                res.sendFile(servers.fileServer.RULE_FILE_PATH);
+            })
+            .put(bodyParser.json({ limit: '1mb' }), (req, res) => {
+                NovelLibrary.Loader.ChangeRule(req.body);
+                servers.fileServer.UpdateRuleFile(req.body)
+                res.send(`{"statu":"success"}`);
+            })
+    }
+}
+
+//Socket通信的应答
+exports.socketApi = function (socket, socketServer, NovelLibrary) {
+    socket.on('Novel/LoadIndex', (msg) => {
+        //目前首页载入按钮用的是这儿
+        NovelLibrary.Loader.LoadNovelIndex(msg, (id, novel, err) => {
+            if (err) {
+                socketServer.emit('Novel/LoadIndex/Fail', msg, err);
+                return;
+            }
+            socketServer.emit('Novel/LoadIndex/Finish', id, novel);
+        });
+        //TEST: 测试用
+        // Novel.Solution.AddNewItem(msg,"测试的标题",true);
+    });
+    socket.on('Novel/Download', (novel) => {
+        NovelLibrary.Loader.DownloadNovel(novel);
+    });
+
+}
