@@ -11,11 +11,16 @@ if (!Cache.CheckFile(Cache.SOLUTION_FILE_PATH)) {
     fs.writeFileSync(Cache.SOLUTION_FILE_PATH, "[]");
 }
 
-let temp_path = process.cwd() + "/download/temp";
-if (!fs.existsSync(temp_path)) {
-    console.log("创建下载文件及临时目录", temp_path);
-    fs.mkdirSync(temp_path);
-}
+let DirToMake = [
+    process.cwd() + "/download",
+    process.cwd() + "/download/temp"
+]
+DirToMake.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        console.log("创建下载文件及临时目录", dir);
+        fs.mkdirSync(dir);
+    }
+})
 
 
 console.warn("运行环境初始化完成！！，可用 node start.js 运行程序。");
