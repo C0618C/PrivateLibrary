@@ -24,6 +24,14 @@
             font-size: 1.5em;
         }
 
+        #novel_nav {
+            opacity: 1;padding:10px 2px 20px 10px; 
+        }
+
+        #novel_nav:hover {
+            opacity: 1;
+        }
+
         #novel_nav ul.nav {
             max-height: 800px;
             position: relative;
@@ -36,7 +44,7 @@
         }
 
         #novel_nav .active {
-            background-color: blue;
+            background-color: #d4edda;
         }
 
         .side_bar {
@@ -44,14 +52,17 @@
             top: 4rem;
             height: calc(100vh - 4rem);
         }
-        @media screen and (max-width:1200px){
-            .side{display: none !important;}
+
+        @media screen and (max-width:1200px) {
+            .side {
+                display: none !important;
+            }
         }
     </style>
     <title>阅读</title>
 </head>
 
-<body data-spy="scroll" data-target="#novel_nav" data-offset="80">
+<body data-spy="scroll" data-target="#novel_nav" data-offset="160">
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <a class="navbar-brand" href="#">小说下载</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -67,7 +78,10 @@
                     <a class="nav-link" href="/setting">设置</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">下载小说</a>
+                    <a class="nav-link" href="#" id="go_to_index">下载小说</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="toggle_nva_item">显示/隐藏目录</a>
                 </li>
             </ul>
         </div>
@@ -88,7 +102,7 @@
 
         <div class="row justify-content-md-center">
             <div class="col-md-2 side_bar side">
-                <nav class="navbar navbar-light bg-light" id="novel_nav">
+                <nav class="navbar navbar-light bg-light collapse" id="novel_nav">
                     <ul class="nav fixed-top" style="margin-top: 30px;"></ul>
                 </nav>
             </div>
@@ -97,6 +111,8 @@
         </div>
 
     </div>
+    <input type="hidden" id="topFile" />
+    <input type="hidden" id="endFile" />
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
@@ -105,8 +121,11 @@
         //     let curID = $("#id").val();
         //     if (curID == id) InitNovel(novel);
         // });
+        let isRuning = false;
+        let fn_LoadFinish = () => { isRuning = false; }
 
         $(function () {
+
             $.ajax({
                 url: location.pathname, method: "POST", dataType: "json",
                 success: (result) => {
@@ -116,14 +135,33 @@
 
                     InitNavbar(result.chapters);
 
-                    // $('body').scrollspy({ target: "#novel_nav" });
-                    // $("#novel_nav").scrollspy();
-                    // $("#novel_nav").on('activate.bs.scrollspy', function () {
-                    //     var currentItem = $(".nav li.active > a").text();
-                    //     console.log(currentItem);
-                    // })
+                    $("#topFile,#endFile").val(result.cid);
+                    $("#go_to_index").attr("href", "/item/" + result.id);
                 }
+            });
+
+            $("#toggle_nva_item").on("click",()=>{
+                $("#novel_nav").toggleClass("collapse");
             })
+
+            //初始化滚动监听
+            $(document).on('scroll', function () {
+                let clientHeight = document.documentElement.clientHeight; //浏览器高度
+                let scrollHeight = document.body.scrollHeight;          //文档总高度
+                let scrollTop = document.documentElement.scrollTop;     //滚动上去的高度
+
+                const span = 80;        //预留的高度
+
+                if (isRuning) return;
+
+                //滚到底
+                if (clientHeight + scrollTop >= scrollHeight - span) {
+                    console.log("到底！！");
+                    GetAnOtherChapter("next", fn_LoadFinish);
+                } else if (scrollTop == 0) {         //到顶
+                    GetAnOtherChapter("prev", fn_LoadFinish);
+                }
+            });
         });
 
         function FormatContent(content, id) {
@@ -135,7 +173,7 @@
             page.forEach(p => {
                 if (!/^\s*$|请记住本书|最新域名|笔趣阁/.test(p)) pageHtml.push(`<p>${p}</p>`);
                 //else pageHtml.push(`<p style="background-color:#ffffff;">${p}</p>`);
-                else console.log("过滤掉的内容：",p);
+                //else console.log("过滤掉的内容：", p);
             });
             return pageHtml;
         }
@@ -143,9 +181,59 @@
         function InitNavbar(chapters) {
             let nav = [];
             chapters.forEach(c => {
-                nav.push(`<li class="nav-item"><a class="nav-link" href="#${c.file ? c.file.replace(".", "") : ""}">${c.title}</a></li>`)
+                nav.push(`<li class="nav-item"><a class="nav-link" data-file="${c.file}" href="#${c.file ? c.file.replace(".", "") : ""}">${c.title}</a></li>`)
             })
             $("#novel_nav ul").append(nav);
+        }
+
+
+        function GetAnOtherChapter(toword = "next", callback = fn_LoadFinish) {
+            let cpfile;
+            //取得当前章节！！
+            let fileItem = toword == "prev" ? "topFile" : "endFile";
+            console.log("当前文章：", $("#" + fileItem).val())
+            fileItem = $(`a[data-file="${$("#" + fileItem).val()}"]`);
+
+            //计算另一章节
+            if (toword == "next") {
+                cpfile = fileItem.closest("li").next("li").find("a").data("file");
+            } else if (toword == "prev") {
+                cpfile = fileItem.closest("li").prev("li").find("a").data("file");
+            }
+
+            if (cpfile == undefined || typeof (cpfile) === "undefined") {
+                console.error("加载另一章失败，", cpfile, toword);
+                return callback();
+            }
+
+            if (cpfile.length == 0) {
+                Alert("请先缓存当前章", "当前章节尚未缓存")
+                return callback();
+            }
+
+            //调用接口获取
+            $.ajax({
+                url: location.pathname + cpfile, method: "POST", dataType: "json",
+                success: (result) => {
+                    let cpt = $("#" + result.cid.replace(".", ""));
+                    if (cpt.length != 0) {
+                        console.warn("要加载的章节已检测到存在！" + cpt.text());
+                        return callback();
+                    }
+                    let content = FormatContent(result.content, result.cid);
+                    if (toword == "next") {
+                        $("#novel_text").append(content);
+                        $("#endFile").val(result.cid);
+                    }
+                    else if (toword == "prev") {
+                        $("#novel_text").prepend(content);
+                        $("#topFile").val(result.cid);
+                    }
+
+                    Info("章节加载完成！", "", 1500);
+                    callback();
+                }
+            });
         }
 
     </script>

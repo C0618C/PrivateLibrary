@@ -1,6 +1,6 @@
 const fs = require('fs');             //
 
-const RULE_FILE_PATH = process.cwd() + "/rule.json";
+const RULE_FILE_PATH = process.cwd() + "/.sln/rule.json";
 const SOLUTION_FILE_PATH = process.cwd() + "/.sln/index.json";
 class Cache {
     static get RULE_FILE_PATH() {

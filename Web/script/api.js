@@ -61,6 +61,7 @@ function Alert(message, title, delayMS = 0) {
     if (title == undefined) title = "警告："
     NoticeMessage(message, title, { type: "danger", delayMS });
 }
+
 function Success(message, title, delayMS = 0) {
     if (title == undefined) title = "成功："
     NoticeMessage(message, title, { type: "success", delayMS });
@@ -68,4 +69,8 @@ function Success(message, title, delayMS = 0) {
 function Warning(message, title, delayMS = 0) {
     if (title == undefined) title = "注意："
     NoticeMessage(message, title, { type: "warning", delayMS });
+}
+function Info(message, title, delayMS = 0) {
+    if (title == undefined) title = "";
+    NoticeMessage(message, title, { type: "info", delayMS });
 }
