@@ -44,6 +44,9 @@
             top: 4rem;
             height: calc(100vh - 4rem);
         }
+        @media screen and (max-width:1200px){
+            .side{display: none !important;}
+        }
     </style>
     <title>阅读</title>
 </head>
@@ -83,19 +86,14 @@
             </div>
         </div>
 
-        <div class="row flex-xl-nowrap">
-            <div class="col-md-3 col-xl-2 side_bar">
+        <div class="row justify-content-md-center">
+            <div class="col-md-2 side_bar side">
                 <nav class="navbar navbar-light bg-light" id="novel_nav">
                     <ul class="nav fixed-top" style="margin-top: 30px;"></ul>
                 </nav>
             </div>
-
-            <div id="novel_text" class="col-sm-12 col-lg-8 content">
-
-            </div>
-            <div class="col-2">
-
-            </div>
+            <div id="novel_text" class="col-md-12 col-lg-8 content shadow p-3 mb-5 bg-white rounded"></div>
+            <div class="col-md-2 side"></div>
         </div>
 
     </div>
@@ -135,8 +133,9 @@
             pageHtml.push(`<h3 id="${id.replace(".", "")}" style="font-weight:800;margin:40px auto;">${page.shift()}</h3>`);
 
             page.forEach(p => {
-                if (!/^\s*$|请记住本书/.test(p)) pageHtml.push(`<p>${p}</p>`);
-                else pageHtml.push(`<p style="background-color:#ffdddd;">${p}</p>`);
+                if (!/^\s*$|请记住本书|最新域名|笔趣阁/.test(p)) pageHtml.push(`<p>${p}</p>`);
+                //else pageHtml.push(`<p style="background-color:#ffffff;">${p}</p>`);
+                else console.log("过滤掉的内容：",p);
             });
             return pageHtml;
         }

@@ -70,6 +70,8 @@ class Solution {
     GetItemByID(id) {
         let n;
         this.data.forEach(i => { if (i.id == id) { n = i; return; } });
+
+        
         return n;
     }
 
