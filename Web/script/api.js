@@ -52,6 +52,9 @@ function UpdateRuleSetting(setting, callback) {
 }
 
 
+/*** UI、通知的工共API ***/
+
+
 function NoticeMessage(message, title, { type, delayMS } = { type: "primary", delayMS: 0 }) {
     let msgBox = $(`<div class="alert alert-${type} fixed-top" role="alert"><strong>${title}</strong>${message} <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>`);
     $("body").append(msgBox);

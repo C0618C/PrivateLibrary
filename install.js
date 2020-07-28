@@ -2,9 +2,9 @@ const fs = require("fs");
 const Cache = require("./novel/cache").Cache;
 
 let DirToMake = [
-    process.cwd() + "/.sln",
-    process.cwd() + "/download",
-    process.cwd() + "/download/temp"
+    process.cwd() + "/.sln",                    //工程目录
+    process.cwd() + "/download",                //小说下载的目录
+    process.cwd() + "/download/temp"            //网页缓存的目录——可以清空清理
 ]
 DirToMake.forEach(dir => {
     if (!fs.existsSync(dir)) {
@@ -19,7 +19,6 @@ if (!Cache.CheckFile(Cache.RULE_FILE_PATH)) {
 }
 if (!Cache.CheckFile(Cache.SOLUTION_FILE_PATH)) {
     console.log("创建书库记录文件：", Cache.SOLUTION_FILE_PATH)
-    fs.mkdirSync(Cache.SOLUTION_FILE_PATH.substr(0, Cache.SOLUTION_FILE_PATH.lastIndexOf("/")));
     fs.writeFileSync(Cache.SOLUTION_FILE_PATH, "[]");
 }
 
