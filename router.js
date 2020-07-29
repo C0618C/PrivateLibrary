@@ -47,7 +47,7 @@ exports.Init = function (servers, NovelLibrary) {
 
         //删除书库中的某本书
         web.delete("/api/solution/deleteitem", urlencodedParser, (req, res) => {
-            res.send(NovelLibrary.Solution.DeleteItem(req.body.id));
+            res.send(NovelLibrary.Solution.DeleteItem(req.body.id, req.body.isDelFile));
         });
     }
 

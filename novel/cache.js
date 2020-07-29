@@ -1,14 +1,12 @@
 const fs = require('fs');             //
 
+const NOVEL_DOWNLOAD_PATH = process.cwd() + "/download";
 const RULE_FILE_PATH = process.cwd() + "/.sln/rule.json";
 const SOLUTION_FILE_PATH = process.cwd() + "/.sln/index.json";
 class Cache {
-    static get RULE_FILE_PATH() {
-        return RULE_FILE_PATH;
-    }
-    static get SOLUTION_FILE_PATH() {
-        return SOLUTION_FILE_PATH;
-    }
+    static get NOVEL_DOWNLOAD_PATH() { return NOVEL_DOWNLOAD_PATH; }
+    static get RULE_FILE_PATH() { return RULE_FILE_PATH; }
+    static get SOLUTION_FILE_PATH() { return SOLUTION_FILE_PATH; }
 
 
 
@@ -20,8 +18,11 @@ class Cache {
         fs.writeFileSync(this.GetNovelCacheSetting(novel.title), JSON.stringify(novel));
     }
 
+    static GetNovelPath(novel_name) {
+        return NOVEL_DOWNLOAD_PATH + `/${novel_name}`
+    }
     static GetNovelCachePath(novel_name) {
-        return `download/${novel_name}/cache`
+        return NOVEL_DOWNLOAD_PATH + `/${novel_name}/cache`
     }
 
     static GetNovelCacheSetting(novel_name) {
@@ -47,6 +48,13 @@ class Cache {
             // console.warn(err);
             return false;
         }
+    }
+
+    static DeleteNovel(novel_name) {
+        let dir = Cache.GetNovelPath(novel_name);
+        fs.rmdir(dir, { recursive: true }, (err) => {       //NOTE: 实验性的API
+            if (err) console.error("尝试删除目录失败，请手工删除：", dir, e.message);
+        });
     }
 
 

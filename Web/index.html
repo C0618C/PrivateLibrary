@@ -74,10 +74,28 @@
 
             $("#solution_list").on("click", "a.deleteNovel", (e) => {
                 let id = $(e.target).nextAll("input[name=novel_id]").val();
-                let isDelFile = false;
-                DeleteNovel(id, isDelFile, (isOK) => {
-                    if (isOK) $("input[value=" + id + "]").closest(".card").remove();
-                })
+                let novel_title = $(e.target).closest("div").find("h5").text();
+                ShowModalDialog({
+                    title: "将要从书库中移除" + novel_title,
+                    body: "是否同时删除存储文件?",
+                    initfn: (dialog) => {
+                        let btBar = dialog.find(".modal-footer");
+                        btBar.append(
+                            $(`<input id='result' type='hidden'/><button type="button" class="btn btn-primary" data-dismiss="modal">仅从列表移除</button>`).on("click", (e) => { $(e.target).prevAll("#result").val("no") }),
+                            $(`<button type="button" class="btn btn-danger" data-dismiss="modal">同时从硬盘删除</button>`).on("click", (e) => { $(e.target).prevAll("#result").val("yes") })
+                        )
+                    },
+                    callback: (dialog) => {
+                        let rsl = dialog.find("#result").val();
+                        if (rsl == "") return;
+                        let isDelFile = rsl == "yes";
+
+                        DeleteNovel(id, isDelFile, (isOK) => {
+                            if (isOK) $("input[value=" + id + "]").closest(".card").remove();
+                        });
+                    }
+                });
+
             });
             $("#solution_list").on("click", "a.updateIndex", (e) => {
                 let id = $(e.target).nextAll("input[name=novel_id]").val();

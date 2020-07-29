@@ -77,3 +77,40 @@ function Info(message, title, delayMS = 0) {
     if (title == undefined) title = "";
     NoticeMessage(message, title, { type: "info", delayMS });
 }
+
+
+function ShowModalDialog({ title, body, buttons, callback, initfn }) {
+    let dialog = $(`
+    <div class="modal fade" id="modalWin" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">${title ? title : ""}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          ${body ? body : ""}
+        </div>
+        <div class="modal-footer">
+            ${buttons ? buttons : ""}
+        </div>
+      </div>
+    </div>
+  </div>    
+    `);
+
+    if (initfn) initfn(dialog);         //Dom类初始化
+
+    $("body").append(dialog);
+    dialog.modal();
+    dialog.on("hidden.bs.modal", () => {
+        if (callback) callback(dialog);
+        dialog.remove();
+    });
+    /*
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Understood</button>
+    */
+}

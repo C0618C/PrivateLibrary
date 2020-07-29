@@ -37,7 +37,7 @@ class Solution {
     }
     SaveSetting() {
         try {
-            fs.writeFile(solutionCacheFile, JSON.stringify(Array.from(this.data)),()=>{});
+            fs.writeFile(solutionCacheFile, JSON.stringify(Array.from(this.data)), () => { });
         } catch (e) {
             console.error("更新书库库存时出错", e)
         }
@@ -71,8 +71,11 @@ class Solution {
     GetItemByID(id) { return this.GetItemBy("id", id); }
     GetItemByUrl(url) { return this.GetItemBy("url", url); }
 
-    DeleteItem(id) {
+    DeleteItem(id, isDelFile) {
         let n = this.GetItemByID(id);
+
+        if (isDelFile && n) Cache.DeleteNovel(n.title);
+  
         if (this.data.delete(n)) {
             this.SaveSetting();
             return "ok";
@@ -82,7 +85,7 @@ class Solution {
 
     GetNoevlIndex(id, isUseCache) {
         let novel = this.GetItemByID(id);
-        if(novel==undefined) return null;
+        if (novel == undefined) return null;
         try {
             if (!isUseCache) throw "重新爬";
             //载入缓存的目录
