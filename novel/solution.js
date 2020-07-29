@@ -30,18 +30,17 @@ class Solution {
     async InitData() {
         let setting = await fs.readFileSync(solutionCacheFile).toString();
         try {
-            setting = JSON.parse(setting);
+            this.data = new Set(JSON.parse(setting));
         } catch (e) {
-            setting = [];
         }
-        for (let s of setting) {
-            this.data.add(s);
-        }
+        setting = null;
     }
-    async SaveSetting() {
-        let setting = [];
-        this.data.forEach(s => setting.push(s));
-        await fs.writeFileSync(solutionCacheFile, JSON.stringify(setting));
+    SaveSetting() {
+        try {
+            fs.writeFile(solutionCacheFile, JSON.stringify(Array.from(this.data)),()=>{});
+        } catch (e) {
+            console.error("更新书库库存时出错", e)
+        }
     }
     AddNewItem(url, title, count, isSaveNow = false) {
         let nv = this.GetItemByUrl(url);
@@ -61,47 +60,34 @@ class Solution {
     }
     //取得所有书籍
     GetItems() {
-        let temp = [];
-        this.data.forEach(i => {
-            temp.push(Object.assign({}, i));
-        });
-        return temp;
+        return Array.from(this.data, o => Object.assign({}, o));
     }
-    GetItemByID(id) {
-        let n;
-        this.data.forEach(i => { if (i.id == id) { n = i; return; } });
 
-        
+    GetItemBy(attr, value) {
+        let n;
+        this.data.forEach(i => { if (i[attr] == value) { n = i; return; } });
         return n;
     }
-
-    GetItemByUrl(url) {
-        let t;
-        this.data.forEach(i => {
-            if (i.url == url) { t = i; return i; }
-        });
-        return t;
-    }
+    GetItemByID(id) { return this.GetItemBy("id", id); }
+    GetItemByUrl(url) { return this.GetItemBy("url", url); }
 
     DeleteItem(id) {
-        let n;
-        this.data.forEach(i => { if (i.id == id) { n = i; return; } });
+        let n = this.GetItemByID(id);
         if (this.data.delete(n)) {
             this.SaveSetting();
             return "ok";
         }
-
         return "none";
     }
 
-
     GetNoevlIndex(id, isUseCache) {
         let novel = this.GetItemByID(id);
+        if(novel==undefined) return null;
         try {
             if (!isUseCache) throw "重新爬";
             //载入缓存的目录
             let novelCache = Cache.GetNovelIndex(novel.title);
-            return novelCache;
+            return JSON.parse(novelCache);
         } catch (err) {
             //重新爬目录
             this.loader(novel.url, (id, novel) => {
@@ -123,12 +109,13 @@ class Solution {
         let getFile = curFile ? curFile : startFile;
         let content = fs.readFileSync(Cache.GetNovelCachePath(info.title) + "/" + getFile).toString();
 
+        //如果指定了curFile，则是在已有目录的情况下请求指定文章，不需要后续逻辑返回整个目录
         if (curFile) {
             return { content, cid: getFile };
         }
 
+        //返回整个书目
         let novel = this.GetNoevlIndex(id, true);
-        novel = JSON.parse(novel);
         novel.content = content;
         novel.cid = getFile;
         novel = JSON.stringify(novel);
