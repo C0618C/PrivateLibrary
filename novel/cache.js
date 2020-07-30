@@ -17,6 +17,9 @@ class Cache {
         novel.time = new Date().getTime();
         fs.writeFileSync(this.GetNovelCacheSetting(novel.title), JSON.stringify(novel));
     }
+    static SaveIndexStatus(novel) {
+        fs.writeFileSync(this.GetNovelCacheSetting(novel.title), JSON.stringify(novel));
+    }
 
     static GetNovelPath(novel_name) {
         return NOVEL_DOWNLOAD_PATH + `/${novel_name}`

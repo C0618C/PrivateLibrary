@@ -25,7 +25,8 @@
         }
 
         #novel_nav {
-            opacity: 1;padding:10px 2px 20px 10px; 
+            opacity: 1;
+            padding: 10px 2px 20px 10px;
         }
 
         #novel_nav:hover {
@@ -106,7 +107,7 @@
                     <ul class="nav fixed-top" style="margin-top: 30px;"></ul>
                 </nav>
             </div>
-            <div id="novel_text" class="col-md-12 col-lg-8 content shadow p-3 mb-5 bg-white rounded"></div>
+            <div id="novel_text" class="col-md-12 col-lg-8 content"></div>
             <div class="col-md-2 side"></div>
         </div>
 
@@ -125,13 +126,12 @@
         let fn_LoadFinish = () => { isRuning = false; }
 
         $(function () {
-
             $.ajax({
                 url: location.pathname, method: "POST", dataType: "json",
                 success: (result) => {
                     $("#loading").remove();
                     //console.log(result);
-                    $("#novel_text").append(FormatContent(result.content, result.cid));
+                    $("#novel_text").append($(`<section id="${result.cid.replace(".", "")}" class="shadow p-3 mb-5 bg-white rounded"></section>`).append(FormatContent(result.content, result.cid)))
 
                     InitNavbar(result.chapters);
 
@@ -140,7 +140,7 @@
                 }
             });
 
-            $("#toggle_nva_item").on("click",()=>{
+            $("#toggle_nva_item").on("click", () => {
                 $("#novel_nav").toggleClass("collapse");
             })
 
@@ -164,11 +164,11 @@
             });
         });
 
-        function FormatContent(content, id) {
+        function FormatContent(content) {
             let page = content.split("\n");
 
             let pageHtml = []
-            pageHtml.push(`<h3 id="${id.replace(".", "")}" style="font-weight:800;margin:40px auto;">${page.shift()}</h3>`);
+            pageHtml.push(`<h3 style="font-weight:800;margin:40px auto;">${page.shift()}</h3>`);
 
             page.forEach(p => {
                 if (!/^\s*$|请记住本书|最新域名|笔趣阁|手机阅读|下次打开书架即可看到|全文阅读地址|txt下载地址|推荐本书，谢谢您的支持/.test(p)) pageHtml.push(`<p>${p}</p>`);
@@ -211,30 +211,35 @@
                 return callback();
             }
 
+            let cpDom = $(`<section id="${cpfile.replace(".", "")}" class="shadow p-3 mb-5 bg-white rounded"></section>`);
+            if (toword == "next") {
+                $("#novel_text").append(cpDom);
+                $("#endFile").val(cpfile);
+            }
+            else if (toword == "prev") {
+                $("#novel_text").prepend(cpDom);
+                $("#topFile").val(cpfile);
+            }
+
+
             //调用接口获取
             $.ajax({
                 url: location.pathname + cpfile, method: "POST", dataType: "json",
                 success: (result) => {
                     let cpt = $("#" + result.cid.replace(".", ""));
-                    if (cpt.length != 0) {
-                        console.warn("要加载的章节已检测到存在！" + cpt.text());
+                    if (cpt.length == 0) {
+                        console.warn("要加载的章节容器没有加入文档！" + cpt.text());
                         return callback();
                     }
                     let content = FormatContent(result.content, result.cid);
-                    if (toword == "next") {
-                        $("#novel_text").append(content);
-                        $("#endFile").val(result.cid);
-                    }
-                    else if (toword == "prev") {
-                        $("#novel_text").prepend(content);
-                        $("#topFile").val(result.cid);
-                    }
+                    cpt.append(content);
 
                     Info("章节加载完成！", "", 1500);
                     callback();
                 }
             });
         }
+
 
     </script>
 </body>

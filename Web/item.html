@@ -114,6 +114,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
         const successStyle = "alert-success text-success hascache";
+        const readedStyle = "alert-info text-info hascache";
         const failStyle = "alert-danger text-danger hascache";
         var socket = io();
         socket.on('Novel/LoadIndex/Finish', function (id, novel) {
@@ -184,6 +185,7 @@
             let i = 0;
             novel_setting.chapters.forEach(novel => {
                 let successStatu = novel.file ? successStyle : "uncache_file";
+                if (novel.readed) successStatu = readedStyle;
                 indexs.push(`
 <div class="col">
 <div class="input-group mb-3" title="${novel.title}">

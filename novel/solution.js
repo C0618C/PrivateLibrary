@@ -75,7 +75,7 @@ class Solution {
         let n = this.GetItemByID(id);
 
         if (isDelFile && n) Cache.DeleteNovel(n.title);
-  
+
         if (this.data.delete(n)) {
             this.SaveSetting();
             return "ok";
@@ -112,17 +112,31 @@ class Solution {
         let getFile = curFile ? curFile : startFile;
         let content = fs.readFileSync(Cache.GetNovelCachePath(info.title) + "/" + getFile).toString();
 
+
+        //置为已读
+        let novel = this.GetNoevlIndex(id, true);
+        this.SetReadedStatus(novel, getFile);
+
         //如果指定了curFile，则是在已有目录的情况下请求指定文章，不需要后续逻辑返回整个目录
         if (curFile) {
             return { content, cid: getFile };
         }
 
         //返回整个书目
-        let novel = this.GetNoevlIndex(id, true);
         novel.content = content;
         novel.cid = getFile;
         novel = JSON.stringify(novel);
         return novel;
+    }
+
+    SetReadedStatus(book, file) {
+        let cp = book.chapters;
+        cp.forEach(c => {
+            if (c.file == file) {
+                c.readed = true;
+                Cache.SaveIndexStatus(book);
+            }
+        })
     }
 }
 
