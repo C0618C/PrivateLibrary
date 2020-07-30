@@ -176,7 +176,7 @@ function DownloadNovel(novel) {
         if (!cpStting) return;//分派完 但不一定是已下载完
 
         _loadAChapter(cpStting, (needWait, isTryAgain) => {
-            if (isTryAgain) chapters.push(cpStting);
+            if (isTryAgain) { chapters.push(cpStting); console.warn("失败了，加入队尾重试", cpStting) }
 
             if (jobDoneCount == dwChapterCount) {
                 let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters });
