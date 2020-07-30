@@ -133,7 +133,7 @@
             let pc = msg.done / msg.count * 100;
             $("#processDownload").width(pc.toFixed(2) + "%").show();
             $("#processBar").show();
-            $(`[value="${msg.url}"]:checkbox`).closest(".col").find(".uncache_file").addClass(msg.isok ? successStyle : failStyle);
+            let cpItem = $(`[value="${msg.url}"]:checkbox`).closest(".col").find(".uncache_file").removeClass(!msg.isok ? successStyle : failStyle).addClass(msg.isok ? successStyle : failStyle);
         });
         //检查中的进度
         socket.on('Novel/CheckCache', function (id, msg, failurl) {

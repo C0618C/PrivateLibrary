@@ -118,7 +118,7 @@ function DownloadNovel(novel) {
     /**
      * 单篇文章下载器
      * @param {*} chapterSetting 
-     * @param {function(isNeedWait)} callback 进入下一轮的定时器
+     * @param {function(isNeedWait,isTryAgain)} callback 进入下一轮的定时器
      */
     let _loadAChapter = (chapterSetting, callback) => {
         //console.log("给我爬", chapterSetting)
@@ -145,8 +145,8 @@ function DownloadNovel(novel) {
         GetTextByURL(host + curChapterSetting.url, rule.encoding, (text, err) => {
             if (err || text == null) {
                 let msg = { done: jobDoneCount, count: dwChapterCount, url: curChapterSetting.url, isok: false };
-                Servers.socketServer.emit("Novel/Downloading", novel.id, msg);
-                callback(true);//出错了 就等等再重启下载
+                Servers.socketServer.emit("Novel/Downloading", novel.id, msg);           //通知出错了
+                callback(true, true);//出错了 就等等再重启下载
                 return;
             }
             let content = ParseContentPage(text, rule.content_page);
@@ -175,7 +175,9 @@ function DownloadNovel(novel) {
         let cpStting = chapters.shift();
         if (!cpStting) return;//分派完 但不一定是已下载完
 
-        _loadAChapter(cpStting, (needWait) => {
+        _loadAChapter(cpStting, (needWait, isTryAgain) => {
+            if (isTryAgain) chapters.push(cpStting);
+
             if (jobDoneCount == dwChapterCount) {
                 let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters });
 
@@ -309,8 +311,8 @@ function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
     let tempFilePath = GetTempPathByUrl(url);
     if (Cache.CheckFile(tempFilePath)) {
         if (isUseCace) {
-            //console.warn("使用了临时文件：", url, tempFilePath);
-            callback_text_err(fs.readFileSync(tempFilePath));
+            console.warn("使用了临时文件：", url, tempFilePath);
+            callback_text_err(fs.readFileSync(tempFilePath).toString());
             return;
         }
     }
@@ -318,14 +320,14 @@ function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
     pipeline(
         got.stream(url, { timeout: 10000 }),
         Iconv.decodeStream(encoding),
-        fs.createWriteStream(tempFilePath),
+        fs.createWriteStream(tempFilePath),                     //NOTE: 这个临时文件显得有点多余
         (err) => {
-            if (err) {
+            if (err) {                  //进这儿的一般是超时出错
                 console.error(url, tempFilePath, err.message);
                 callback_text_err(null, err);
                 return;
             }
-            callback_text_err(fs.readFileSync(tempFilePath));
+            callback_text_err(fs.readFileSync(tempFilePath).toString());
             //console.log("爬完", url, tempFilePath);
         }
     );
