@@ -205,7 +205,7 @@ function DownloadNovel(novel) {
  * @param {*} cacheFile 
  */
 function DownLoadOneChapter(novelid, url, isUseCace, cacheFile) {
-    let novel = Solution.GetNoevlIndex(novelid);
+    let novel = Solution.GetNoevlIndex(novelid, true);
     if (!novel) {
         console.log("找不到对应的书籍信息", novelid);
         return;
