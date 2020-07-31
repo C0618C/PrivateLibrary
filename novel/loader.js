@@ -42,7 +42,7 @@ function Init(solution, ss) {
     Solution.loader = LoadNovelIndex;
     Servers = ss;
 
-    return { LoadNovelIndex, DownloadNovel, ChangeRule };
+    return { LoadNovelIndex, DownloadNovel, DownLoadOneChapter, ChangeRule };
 }
 
 /**
@@ -195,6 +195,30 @@ function DownloadNovel(novel) {
     }
 
     _runner();
+}
+
+/**
+ * 下载/重新下载某一章
+ * @param {*} novelid 
+ * @param {*} url 
+ * @param {*} isUseCace 
+ * @param {*} cacheFile 
+ */
+function DownLoadOneChapter(novelid, url, isUseCace, cacheFile) {
+    let novel = Solution.GetNoevlIndex(novelid);
+    if (!isUseCace) {
+        if (!novel) return;
+        let file = Cache.GetNovelCachePath(novel.title) + "/" + cacheFile;
+
+        fs.unlinkSync(file);
+    }
+
+    let downLoadCP;
+    novel.chapters.forEach(c => {
+        if (c.url == url) downLoadCP = c;
+    });
+    novel.chapters = [downLoadCP];
+    DownloadNovel(novel);
 }
 
 

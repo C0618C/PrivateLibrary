@@ -169,6 +169,7 @@
             });
             $("#bt_download").on("click", StartDownload);
 
+            $("#novel_index").on("click", ".reaload_this_cp", ReloadThisChapter);
 
         });
 
@@ -187,7 +188,7 @@
                 let successStatu = novel.file ? successStyle : "uncache_file";
                 if (novel.readed) successStatu = readedStyle;
                 indexs.push(`
-<div class="col">
+<div class="col one_chapter">
 <div class="input-group mb-3" title="${novel.title}">
   <div class="input-group-prepend">
     <div class="input-group-text ${successStatu}">
@@ -203,7 +204,7 @@
         </svg>
         <div class="dropdown-menu">
             <a class="dropdown-item" href="/read/${novel_setting.id}/${novel.file}/" style="display:${novel.file ? "inherit" : "none"};">从这开始连读</a>
-            <a class="dropdown-item" href="#">施工中</a>
+            <a class="dropdown-item reaload_this_cp" href="#" data-url="${novel.url}" data-id="${novel_setting.id}" data-file="${novel.file}">重新下载本章</a>
             <div role="separator" class="dropdown-divider"></div>
             <a class="dropdown-item" href="${host + novel.url}" target="_blank">查看来源</a>
         </div>
@@ -259,6 +260,25 @@
             console.log("请求下载", param)
             socket.emit("Novel/Download", param);
 
+        }
+
+        //重新下载指定章节
+        function ReloadThisChapter(element) {
+            let obj = $(element.target);
+            let url = obj.data("url");
+            let file = obj.data("file");
+            let id = obj.data("id");//bookid;
+
+            console.log(url, file, id);
+
+            obj.closest(".one_chapter").find(".hascache").removeClass(`${successStyle} ${failStyle} ${readedStyle}`);
+            $.ajax({
+                url: "/api/novel/loadchapters", dataType: "json",
+                data: { id: id, isUseCache: false, file: file, url: url }, method: "POST",
+                success: (result) => {
+                    //if (callback) callback(result);
+                }
+            })
         }
     </script>
 </body>

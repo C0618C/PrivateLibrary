@@ -53,16 +53,19 @@ exports.Init = function (servers, NovelLibrary) {
 
 
     {    /** 单本书籍的API **/
-        //缓存某个地址
-        web.post("/api/novel/load", urlencodedParser, (req, res) => {
-            res.send(NovelLibrary.Load(req.body.url));//是否更新/读缓存
-        });
-
         //读取某个小说目录
         web.post("/api/novel/index", urlencodedParser, (req, res) => {
             let cache = req.body.isUseCache == "true";
             res.send(NovelLibrary.Solution.GetNoevlIndex(req.body.id.split("#")[0], cache));
         });
+
+        web.post("/api/novel/loadchapters", urlencodedParser, (req, res) => {
+            let cache = req.body.isUseCache == "true";
+            //id: id, isUseCache: false, file: file, url: url
+            NovelLibrary.Loader.DownLoadOneChapter(req.body.id, req.body.url, req.body.isUseCache, req.body.file);
+            res.send("started");
+        });
+
     }
 
     {   /** 其它API **/
