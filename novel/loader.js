@@ -134,7 +134,7 @@ function DownloadNovel(novel) {
         checkChapters.push(curChapterSetting);
 
         //查到缓存记录，跳过
-        if (curChapterSetting.file != undefined) {
+        if (curChapterSetting.file && chapterSetting.reload !== true) {
             //console.log("当前文件已缓存", curChapterSetting);
             jobDoneCount++;
             if (callback) callback(false);
@@ -204,19 +204,22 @@ function DownloadNovel(novel) {
  * @param {*} isUseCace 
  * @param {*} cacheFile 
  */
-function DownLoadOneChapter(novelid, url, isUseCace, cacheFile) {
+function DownLoadOneChapter(novelid, url, isUseCace, cacheFile, host) {
     let novel = Solution.GetNoevlIndex(novelid, true);
     if (!novel) {
         console.log("找不到对应的书籍信息", novelid);
         return;
     }
+
+    novel.host = host;
     if (!isUseCace) {
         let file = Cache.GetNovelCachePath(novel.title) + "/" + cacheFile;
-
-        fs.unlinkSync(file);
+        let temfile = GetTempPathByUrl(host + url);
+        console.log("删除存档文件", file, temfile, novel.host + url);
+        try { fs.unlinkSync(file); fs.unlinkSync(temfile); } catch (e) { }
     }
 
-    console.log("重下的小说信息", novelid, novel)
+    //console.log("重下的小说信息", novelid, novel)
 
     let downLoadCP;
     novel.chapters.forEach(c => {
@@ -226,6 +229,8 @@ function DownLoadOneChapter(novelid, url, isUseCace, cacheFile) {
         console.warn("重下指定章，定位章节失败", novelid, url);
         return;
     }
+    downLoadCP.file = null;
+    downLoadCP.reload = true;
     novel.chapters = [downLoadCP];
     DownloadNovel(novel);
 }

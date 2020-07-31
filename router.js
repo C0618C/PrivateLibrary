@@ -61,8 +61,7 @@ exports.Init = function (servers, NovelLibrary) {
 
         web.post("/api/novel/loadchapters", urlencodedParser, (req, res) => {
             let cache = req.body.isUseCache == "true";
-            //id: id, isUseCache: false, file: file, url: url
-            NovelLibrary.Loader.DownLoadOneChapter(req.body.id, req.body.url, req.body.isUseCache, req.body.file);
+            NovelLibrary.Loader.DownLoadOneChapter(req.body.id, req.body.url, cache, req.body.file, req.body.host);
             res.send("started");
         });
 

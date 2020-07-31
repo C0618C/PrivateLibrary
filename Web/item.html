@@ -274,7 +274,7 @@
             obj.closest(".one_chapter").find(".hascache").removeClass(`${successStyle} ${failStyle} ${readedStyle}`);
             $.ajax({
                 url: "/api/novel/loadchapters", dataType: "json",
-                data: { id: id, isUseCache: false, file: file, url: url }, method: "POST",
+                data: { id: id, isUseCache: false, file: file, url: url, host: $("#host").val() }, method: "POST",
                 success: (result) => {
                     //if (callback) callback(result);
                 }
