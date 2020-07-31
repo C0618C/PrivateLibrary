@@ -206,17 +206,26 @@ function DownloadNovel(novel) {
  */
 function DownLoadOneChapter(novelid, url, isUseCace, cacheFile) {
     let novel = Solution.GetNoevlIndex(novelid);
+    if (!novel) {
+        console.log("找不到对应的书籍信息", novelid);
+        return;
+    }
     if (!isUseCace) {
-        if (!novel) return;
         let file = Cache.GetNovelCachePath(novel.title) + "/" + cacheFile;
 
         fs.unlinkSync(file);
     }
 
+    console.log("重下的小说信息", novelid, novel)
+
     let downLoadCP;
     novel.chapters.forEach(c => {
         if (c.url == url) downLoadCP = c;
     });
+    if (!downLoadCP) {
+        console.warn("重下指定章，定位章节失败", novelid, url);
+        return;
+    }
     novel.chapters = [downLoadCP];
     DownloadNovel(novel);
 }
