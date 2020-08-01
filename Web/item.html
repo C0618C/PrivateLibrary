@@ -97,7 +97,7 @@
                         title="选中的复选框开始，后面的复选框均会被选中。">从此以后</label>
                     <input type="radio" name="click_action" id="ca_2" value="2" /><label for="ca_2">当前而已</label>
                     <input type="checkbox" id="iscompress" checked /><label for="iscompress">下载后合并</label>
-                    <input type="checkbox" id="printPdf" /><label for="iscompress">生成PDF</label>
+                    <input type="checkbox" id="printPdf" /><label for="printPdf">生成PDF</label>
                     <!-- <input type="checkbox" id="IsUseCache" /><label for="IsUseCache">使用缓存</label> -->
                     <input type="hidden" id="host" value="" />
                     <input type="hidden" id="id" value="" />
@@ -124,8 +124,8 @@
         socket.on('Novel/Download/Finish', function (id, novel, new_file_name) {
             let curID = $("#id").val();
             if (curID !== id) return;
-            Success("已保存：" + new_file_name, "所有任务已完成！");
-        });
+            Success(`已保存：${new_file_name ? new_file_name : novel.title} 所有任务已完成！`);
+        }); new_file_name ? new_file_name : novel.title
         socket.on('Novel/Downloading', function (id, msg) {
             let curID = $("#id").val();
             if (curID !== id) return;
@@ -236,6 +236,7 @@
             let host = $("#host").val();
             let title = $("#novel_title").text();
             let iscompress = $("#iscompress").prop("checked");
+            let printPdf = $("#printPdf").prop("checked");
             let items = $("[id^=cp_]:checked:checked");
 
             if (items.length == 0) {
@@ -255,7 +256,9 @@
                 id: $("#id").val(),
                 chapters: urls,
                 host: host,
-                title: $("#novel_title").text()
+                title: $("#novel_title").text(),
+                iscompress: iscompress,
+                printPdf: printPdf
             }
             console.log("请求下载", param)
             socket.emit("Novel/Download", param);

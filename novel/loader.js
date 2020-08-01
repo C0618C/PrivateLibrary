@@ -182,7 +182,10 @@ function DownloadNovel(novel) {
                 let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters });
 
                 if (!isCheckOK) return;//文件校验失败 不合并
-
+                if (!novel.iscompress) {//选择了不合并
+                    Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
+                    return;
+                }
                 CombineFiles({ title: novel.title, chapters: checkChapters }, (new_file_name) => {
                     Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex, new_file_name);
                     console.log("所有任务已完成：", novel.title);
@@ -198,7 +201,7 @@ function DownloadNovel(novel) {
 }
 
 /**
- * 下载/重新下载某一章
+ * 下载/重新下载某一章 已存在缓存的话会先删除
  * @param {*} novelid 
  * @param {*} url 
  * @param {*} isUseCace 
