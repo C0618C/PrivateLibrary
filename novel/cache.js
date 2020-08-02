@@ -69,6 +69,32 @@ class Cache {
     static UpdateRuleFile(setting) {
         return fs.writeFileSync(RULE_FILE_PATH, typeof (setting) == "string" ? setting : JSON.stringify(setting));
     }
+
+
+    //FileSystem
+    static async GetDirStatus(curPath) {
+        let result = {
+            root: NOVEL_DOWNLOAD_PATH,
+            curPath: NOVEL_DOWNLOAD_PATH + curPath,
+            dir: [],
+            file: []
+        };
+        const dir = fs.opendirSync(result.curPath);
+        for await (const dirent of dir) {
+            if (dirent.isDirectory()) result.dir.push(dirent.name);
+            else if (dirent.isFile()) result.file.push(dirent.name);
+        }
+        return result;
+    }
+
+    static DeleteFloder(target) {
+        console.warn("删除文件夹：",NOVEL_DOWNLOAD_PATH + target);
+        fs.rmdir(NOVEL_DOWNLOAD_PATH + target, { recursive: true }, () => { });
+    }
+    static DeleteFile(target) {
+        console.warn("删除文件：",NOVEL_DOWNLOAD_PATH + target);
+        fs.unlinkSync(NOVEL_DOWNLOAD_PATH + target);
+    }
 }
 
 exports.Cache = Cache;

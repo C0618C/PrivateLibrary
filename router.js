@@ -67,6 +67,26 @@ exports.Init = function (servers, NovelLibrary) {
 
     }
 
+    {
+        web.post("/api/fs/dirstatus", urlencodedParser, (req, res) => {
+            let curPath = req.body.curPath;
+            servers.fileServer.GetDirStatus(curPath).then((status) => {
+                res.send(JSON.stringify(status));
+            });
+        });
+        web.post("/api/fs/delete", urlencodedParser, (req, res) => {
+            let curPath = req.body.target;
+            let type = req.body.type;
+            if (type == "floder") {
+                servers.fileServer.DeleteFloder(curPath);
+            } else if (type == "file") {
+                servers.fileServer.DeleteFile(curPath);
+            }
+
+            res.send("ok");
+        });
+    }
+
     {   /** 其它API **/
         web.route("/api/webside/rule")
             .get((req, res) => {
