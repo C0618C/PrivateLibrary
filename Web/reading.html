@@ -140,8 +140,10 @@
                 }
             });
 
-            $("#toggle_nva_item").on("click", () => {
+            $("#toggle_nva_item").on("click", (e) => {
                 $("#novel_nav").toggleClass("collapse");
+                e.stopPropagation();
+                e.preventDefault();
             })
 
             //初始化滚动监听

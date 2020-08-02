@@ -110,6 +110,9 @@ class Solution {
     GetNovelForReading(id, startFile, curFile) {
         let info = this.GetItemByID(id);
         let getFile = curFile ? curFile : startFile;
+
+        if (getFile === "undefined") return "{}";//没找到任何章节——一般在第一章依然往上翻就这样
+
         let content = fs.readFileSync(Cache.GetNovelCachePath(info.title) + "/" + getFile).toString();
 
 

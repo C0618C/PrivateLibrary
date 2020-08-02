@@ -45,7 +45,7 @@
                             当前目录：<span id="cur_path"></span>
                         </div>
 
-                        <div class="card-body" style="padding: 0px;">
+                        <div class="card-body" style="padding: 0px;margin-bottom: 250px;">
                             <div class="list-group" id="root-floder"></div>
                         </div>
                     </div>
@@ -111,7 +111,7 @@
                     DeleteItem("file", curPath, () => {
                         $(e.target).closest(".card").remove();
                     });
-                    e.stopPropagation()
+                    e.stopPropagation();
                 });
                 if (".nsl" === element) deleteBT.remove();
                 curFloderDom.append(fileDom);
@@ -122,13 +122,13 @@
 
         function MakeADir(dirid, dirname) {
             return `<div class="card bg-light">
-    <a class="list-group-item list-group-item-action list-group-item-warning"  data-toggle="collapse" data-target="#${dirid}">${dirname} <button type="button" class="btn btn-danger btn-sm float-right delfloder">删除</button></a>
+    <a class="list-group-item list-group-item-action list-group-item-warning p-1"  data-toggle="collapse" data-target="#${dirid}">${dirname} <button type="button" class="btn btn-danger btn-sm float-right delfloder">删除</button></a>
     <div class="card-body collapse text-center" id="${dirid}" style="padding: 0px;"><div class="spinner-border text-primary " role="status"><span class="sr-only">Loading...</span></div></div>
 </div>`;
         }
 
         function MakeAFile(dirid, fileName) {
-            return `<div class="card bg-light"><div class="card-body" id="${dirid}">${fileName} <button type="button" class="btn btn-danger btn-sm float-right delfile">删除</button></div></div>`;
+            return `<div class="card bg-light"><div class="card-body p-1" id="${dirid}">${fileName} <button type="button" class="btn btn-danger btn-sm float-right delfile">删除</button></div></div>`;
         }
 
         function DeleteItem(type, target, callback) {

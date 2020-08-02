@@ -99,10 +99,10 @@ function LoadNovelIndex(url, callback, useCache = true) {
 //下载指定小说文章
 function DownloadNovel(novel) {
     let index = Cache.GetNovelIndex(novel.title);
+    let dir = Cache.GetNovelCachePath(novel.title) + "/";
     console.log("开始爬：", novel);
     //小说的索引、目录
     let curIndex = JSON.parse(index);
-
     let chapters = novel.chapters;
     const dwChapterCount = chapters.length;     //总共需要下载的章节数
     let jobDoneCount = 0;                       //已经下载数量
@@ -134,7 +134,7 @@ function DownloadNovel(novel) {
         checkChapters.push(curChapterSetting);
 
         //查到缓存记录，跳过
-        if (curChapterSetting.file && chapterSetting.reload !== true) {
+        if (curChapterSetting.file && Cache.CheckFile(dir + curChapterSetting.file) && chapterSetting.reload !== true) {
             //console.log("当前文件已缓存", curChapterSetting);
             jobDoneCount++;
             if (callback) callback(false);
@@ -154,7 +154,7 @@ function DownloadNovel(novel) {
             //保存到文件
             let fileName = Solution.NewCpID + ".txt";
             curChapterSetting.file = fileName;
-            let cachePath = Cache.GetNovelCachePath(novel.title) + "/" + fileName;
+            let cachePath = dir + fileName;
             Cache.SaveChapter(cachePath, content);
 
             jobDoneCount++;
@@ -179,9 +179,15 @@ function DownloadNovel(novel) {
             if (isTryAgain) { chapters.push(cpStting); console.warn("失败了，加入队尾重试", cpStting) }
 
             if (jobDoneCount == dwChapterCount) {
-                let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters });
+                let failFiles = [];
+                let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters }, failFiles);
 
-                if (!isCheckOK) return;//文件校验失败 不合并
+                if (!isCheckOK) {       //文件校验失败——文件缺失
+                    chapters.push(...failFiles);
+                    jobDoneCount -= failFiles.length;
+                    _runner();      //重新开始
+                    return;
+                }
                 if (!novel.iscompress) {//选择了不合并
                     Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
                     return;
@@ -239,21 +245,20 @@ function DownLoadOneChapter(novelid, url, isUseCace, cacheFile, host) {
 }
 
 
-function CheckCacheFile(novel) {
+function CheckCacheFile(novel, fall_files = []) {
     let dir = Cache.GetNovelCachePath(novel.title) + "/";
     const count = novel.chapters.length;
     let done = 0;
-    let fail = [];
 
     novel.chapters.forEach(chapter => {
         let isOk = chapter.file && Cache.CheckFile(dir + chapter.file);
         done++;
-        if (!isOk) fail.push(chapter);
+        if (!isOk) fall_files.push(chapter);
         Servers.socketServer.emit("Novel/CheckCache", novel.id, { done: done, count: count }, isOk ? null : chapter.url);
     });
 
-    if (fail.length > 0) {
-        console.warn("已下载文件校验失败:", fail);
+    if (fall_files.length > 0) {
+        console.warn("已下载文件校验失败:", fall_files);
         return false;
     }
     return true;
