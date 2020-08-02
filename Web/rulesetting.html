@@ -315,8 +315,13 @@
             $("#setting_form")[0].reset();
             name = name.replace("#", "");
             let url = $("#website_url");
-            if (name == "add") {
+            if (name == "add" || !name) {
                 url.prop("disabled", false);
+                const {search} = window.location;
+                const rhost = /\?host=([\w.]+)/
+                if (rhost.test(search)) {
+                  url.val(search.match(rhost)[1])
+                }
                 return;
             }
             url.val(name);

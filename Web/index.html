@@ -68,7 +68,8 @@
             socket.on('Novel/LoadIndex/Fail', function (url, msg) {
                 if (loading_index_url == url) {
                     Alert(msg, "爬取目录失败：");
-                    window.open("/setting#rulesetting");
+                    const tmp = new URL(url);
+                    window.open(`/setting?host=${tmp.hostname}#rulesetting`);
                 }
             });
 
