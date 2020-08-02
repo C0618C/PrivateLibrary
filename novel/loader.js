@@ -449,7 +449,7 @@ function ParseIndexPage(text, rule, path) {
                 let item = $(cItems[i]);
                 let cp_url = QS_GetValueBySetting(item, rule.chapters.url);
 
-                if (!cp_url.startsWith("/")) {
+                if (!cp_url.startsWith("/") && !/^https?:\/\//.test(cp_url)) {
                     cp_url = basePath + cp_url;
                     // console.log(basePath, cp_url);           //小说目录地址出错时排查
                 }

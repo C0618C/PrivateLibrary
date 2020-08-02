@@ -229,7 +229,7 @@
             <a class="dropdown-item" href="/read/${novel_setting.id}/${novel.file}/" style="display:${novel.file ? "inherit" : "none"};">从这开始连读</a>
             <a class="dropdown-item reaload_this_cp" href="#" data-url="${novel.url}" data-id="${novel_setting.id}" data-file="${novel.file}">重新下载本章</a>
             <div role="separator" class="dropdown-divider"></div>
-            <a class="dropdown-item" href="${host + novel.url}" target="_blank">查看来源</a>
+            <a class="dropdown-item" href="${/^https?/.test(novel.url) ? novel.url : host + novel.url}" target="_blank">查看来源</a>
         </div>
     </div>
   </div>
