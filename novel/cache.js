@@ -34,7 +34,12 @@ class Cache {
 
     static GetNovelIndex(novel_name) {
         let setting = this.GetNovelCacheSetting(novel_name);
-        return fs.readFileSync(setting).toString();
+        try {
+            return fs.readFileSync(setting).toString();
+        } catch(e) {
+            console.error(`未找到 ${setting} 文件，请检查 title 规则是否正确`);
+            console.error(e);
+        }
     }
 
     static SaveChapter(filepath, content) {
