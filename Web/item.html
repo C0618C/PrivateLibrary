@@ -126,7 +126,7 @@
             let curID = $("#id").val();
             if (curID !== id) return;
             Success(`已保存：${new_file_name ? new_file_name : novel.title} 所有任务已完成！`);
-        });
+        }); 
         socket.on('Novel/Downloading', function (id, msg) {
             let curID = $("#id").val();
             if (curID !== id) return;
