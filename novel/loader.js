@@ -2,11 +2,12 @@ const fs = require('fs');             //
 const got = require('got');             //请求远程类容
 const Iconv = require('iconv-lite');    //转码相关
 const cheerio = require('cheerio');     //通过类似jquery的形式解释html源码
-// const { json } = require('body-parser');
-// const { title } = require('process');
+
 const { pipeline } = require('stream');
 
 const Cache = require("./cache").Cache;
+const PDFCreater = require("./pdf");
+
 
 let Solution;
 let Servers;
@@ -188,15 +189,23 @@ function DownloadNovel(novel) {
                     _runner();      //重新开始
                     return;
                 }
-                if (!novel.iscompress) {//选择了不合并
+                if (novel.iscompress) {//选择了不合并
+                    CombineFiles({ title: novel.title, chapters: checkChapters }, (new_file_name) => {
+                        Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex, new_file_name);
+                        console.log("所有任务已完成：", novel.title);
+                    });
+                    return;
+                }
+
+                if (novel.printPdf) {
+                    console.log("开始合并PDF文件！！")
+                    PDFCreater.Create(checkChapters, novel.title + "_" + new Date().getTime())
                     Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
                     return;
                 }
-                CombineFiles({ title: novel.title, chapters: checkChapters }, (new_file_name) => {
-                    Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex, new_file_name);
-                    console.log("所有任务已完成：", novel.title);
-                });
-                return;
+
+                Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
+                console.log("所有任务已完成：", novel.title);
             }
             let sleep_time = jobDoneCount % 5 == 0 ? t_sleep_time * 3 : t_sleep_time;//增加弹性等待时间 防止爬太快出错
             setTimeout(_runner, needWait ? sleep_time : 0);
@@ -251,7 +260,8 @@ function CheckCacheFile(novel, fall_files = []) {
     let done = 0;
 
     novel.chapters.forEach(chapter => {
-        let isOk = chapter.file && Cache.CheckFile(dir + chapter.file);
+        chapter.filepath = dir + chapter.file;
+        let isOk = chapter.file && Cache.CheckFile(chapter.filepath);
         done++;
         if (!isOk) fall_files.push(chapter);
         Servers.socketServer.emit("Novel/CheckCache", novel.id, { done: done, count: count }, isOk ? null : chapter.url);
