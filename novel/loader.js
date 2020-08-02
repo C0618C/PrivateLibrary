@@ -142,7 +142,7 @@ function DownloadNovel(novel) {
         }
 
         //解释小说，提取正文
-        GetTextByURL(host + curChapterSetting.url, rule.encoding, (text, err) => {
+        GetTextByURL(/^https?/.test(curChapterSetting.url) ? curChapterSetting.url : host + curChapterSetting.url, rule.encoding, (text, err) => {
             if (err || text == null) {
                 let msg = { done: jobDoneCount, count: dwChapterCount, url: curChapterSetting.url, isok: false };
                 Servers.socketServer.emit("Novel/Downloading", novel.id, msg);           //通知出错了
