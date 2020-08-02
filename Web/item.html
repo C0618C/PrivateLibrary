@@ -125,6 +125,7 @@
         socket.on('Novel/Download/Finish', function (id, novel, new_file_name) {
             let curID = $("#id").val();
             if (curID !== id) return;
+            $('#bt_download').prop('disabled', false);
             Success(`已保存：${new_file_name ? new_file_name : novel.title} 所有任务已完成！`);
         }); 
         socket.on('Novel/Downloading', function (id, msg) {
@@ -263,6 +264,8 @@
                 printPdf: printPdf,
                 sendmail: sendmail
             }
+            $('#bt_download').prop('disabled', true);
+
             console.log("请求下载", param)
             socket.emit("Novel/Download", param);
 
