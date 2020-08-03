@@ -35,7 +35,7 @@ function DeleteNovel(id, isDelFile, callback) {
 
 function GetRuleSetting(callback) {
     $.ajax({
-        url: "/api/webside/rule", method: "GET", dataType: "json",
+        url: "/api/setting/rule", method: "GET", dataType: "json",
         success: (result) => {
             if (callback) callback(result);
         }
@@ -44,7 +44,7 @@ function GetRuleSetting(callback) {
 //更新
 function UpdateRuleSetting(setting, callback) {
     $.ajax({
-        url: "/api/webside/rule", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify(setting),
+        url: "/api/setting/rule", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify(setting),
         success: (result) => {
             if (callback) callback(result);
         }

@@ -26,7 +26,7 @@
                     <div class="card bg-light">
                         <div class="card-body">
                             <button type="button" class="btn btn-success" id="btn_save">保存</button>
-                            <button type="button" class="btn btn-primary" id="btn_default">生成预览</button>
+                            <button type="button" class="btn btn-primary" id="btn_view">生成预览</button>
                             <button type="reset" class="btn btn-primary" id="btn_default">恢复默认</button>
                         </div>
                     </div>
@@ -59,8 +59,8 @@
                                             </select>
                                         </div>
                                         <div class="form-group row">
-                                            <label for="font_family" class="col-form-label">字号</label>
-                                            <select class="form-control" id="font_family">
+                                            <label for="font_size" class="col-form-label">字号</label>
+                                            <select class="form-control" id="font_size">
                                                 <option>18</option>
                                                 <option>19</option>
                                                 <option>20</option>
@@ -75,9 +75,18 @@
                                                 <option>29</option>
                                             </select>
                                         </div>
+                                        <div class="form-group row">
+                                            <label for="font_size" class="col-form-label">预览文本</label>
+                                            <textarea class="form-control" id="viewText" rows="8"></textarea>
+                                        </div>
                                     </div>
                                     <div class="col-md-9 ">
-                                        <div class="jumbotron" style="height: 100%;"></div>
+                                        <div class="jumbotron" style="height: 100%;">
+                                            <div class="embed-responsive embed-responsive-16by9">
+                                                <iframe class="embed-responsive-item" src="about:blank"
+                                                    id="pdf_viwer"></iframe>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </blockquote>
@@ -85,14 +94,79 @@
                     </div>
 
                 </form>
-
-
             </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
+        $(() => {
+
+            $("#btn_save").on("click", UpdateSetting);
+            $("#btn_view").on("click", CreateAView);
+            $.ajax({
+                url: "/api/setting/font", method: "GET", dataType: "json",
+                success: (result) => {
+                    var fontSel = $("#font_family");
+                    result.forEach(element => {
+                        fontSel.append(`<option>${element}</option>`)
+                    });
+
+                    GetSetting();
+                }
+            });
+        });
+        function GetSetting() {
+            $.ajax({
+                url: "/api/setting/pdf", method: "GET", dataType: "json",
+                success: (result) => {
+                    console.log(result);
+                    $("#pdf_start_x").val(result.paddingX);
+                    $("#pdf_start_y").val(result.paddingY);
+                    $("#font_family").val(result.fontFamily);
+                    $("#font_size").val(result.fontSize);
+                }
+            });
+        }
+        //更新
+        function UpdateSetting() {
+            var setting = {
+                paddingX: $("#pdf_start_x").val(),
+                paddingY: $("#pdf_start_y").val(),
+                fontSize: $("#font_size").val(),
+                fontFamily: $("#font_family").val()
+            }
+            $.ajax({
+                url: "/api/setting/pdf", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify(setting),
+                success: (result) => {
+                    //if (callback) callback(result);
+                    console.log(result);
+                }
+            });
+        }
+
+        //预览
+        function CreateAView() {
+            var setting = {
+                paddingX: $("#pdf_start_x").val(),
+                paddingY: $("#pdf_start_y").val(),
+                fontSize: $("#font_size").val(),
+                fontFamily: $("#font_family").val(),
+                text: $("#viewText").val()
+            }
+            $.ajax({
+                url: "/api/setting/viewpdf", method: "POST", dataType: "text", contentType: 'application/json', data: JSON.stringify(setting),
+                success: (result) => {
+                    //if (callback) callback(result);
+                    console.log("/view/pdf/" + result);
+                    //TODO: 修正延时的做法
+                    setTimeout(() => {
+                        $("#pdf_viwer").attr("src", "/view/pdf/" + result);
+                    }, 3000);
+                }
+            });
+        }
+
     </script>
 </body>
 

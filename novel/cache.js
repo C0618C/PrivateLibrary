@@ -1,14 +1,21 @@
 const fs = require('fs');             //
 
 const NOVEL_DOWNLOAD_PATH = process.cwd() + "/download";
-const RULE_FILE_PATH = process.cwd() + "/.sln/rule.json";
-const SOLUTION_FILE_PATH = process.cwd() + "/.sln/index.json";
+const TEMP_FILE_PATH = NOVEL_DOWNLOAD_PATH+"/temp";
+const SOLUTION_DIR_PATH = process.cwd() + "/.sln";
+const RULE_FILE_PATH = SOLUTION_DIR_PATH + "/rule.json";
+const SOLUTION_FILE_PATH = SOLUTION_DIR_PATH + "/index.json";
+const SYS_SETTING_FILE_PATH = SOLUTION_DIR_PATH + "/setting.json";
+const FONT_DIR_PATH = process.cwd() + "/font";
+
 class Cache {
     static get NOVEL_DOWNLOAD_PATH() { return NOVEL_DOWNLOAD_PATH; }
+    static get TEMP_FILE_PATH() { return TEMP_FILE_PATH; }
     static get RULE_FILE_PATH() { return RULE_FILE_PATH; }
+    static get SOLUTION_DIR_PATH() { return SOLUTION_DIR_PATH; }
     static get SOLUTION_FILE_PATH() { return SOLUTION_FILE_PATH; }
-
-
+    static get SYS_SETTING_FILE_PATH() { return SYS_SETTING_FILE_PATH; }
+    static get FONT_DIR_PATH() { return FONT_DIR_PATH; }
 
 
     static CacheIndex(novel) {
@@ -88,12 +95,38 @@ class Cache {
     }
 
     static DeleteFloder(target) {
-        console.warn("删除文件夹：",NOVEL_DOWNLOAD_PATH + target);
+        console.warn("删除文件夹：", NOVEL_DOWNLOAD_PATH + target);
         fs.rmdir(NOVEL_DOWNLOAD_PATH + target, { recursive: true }, () => { });
     }
     static DeleteFile(target) {
-        console.warn("删除文件：",NOVEL_DOWNLOAD_PATH + target);
+        console.warn("删除文件：", NOVEL_DOWNLOAD_PATH + target);
         fs.unlinkSync(NOVEL_DOWNLOAD_PATH + target);
+    }
+
+
+    //Setting
+    static GetSettingConfig(defSetting) {
+        try {
+            let curSetting = JSON.parse(fs.readFileSync(SYS_SETTING_FILE_PATH).toString());
+            if (defSetting) return Object.assign(defSetting, curSetting);
+            else return curSetting;
+        } catch (e) {
+            this.SetSettingConfig(defSetting || {});
+            return defSetting || {};
+        }
+    }
+
+    static SetSettingConfig(setting) {
+        fs.writeFileSync(SYS_SETTING_FILE_PATH, JSON.stringify(setting));
+    }
+
+    static async GetFontFamily() {
+        let result = [];
+        const dir = fs.opendirSync(FONT_DIR_PATH);
+        for await (const dirent of dir) {
+            if (dirent.isFile() && /.ttf$/.test(dirent.name)) result.push(dirent.name);
+        }
+        return result;
     }
 }
 

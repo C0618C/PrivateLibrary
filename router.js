@@ -88,7 +88,7 @@ exports.Init = function (servers, NovelLibrary) {
     }
 
     {   /** 其它API **/
-        web.route("/api/webside/rule")
+        web.route("/api/setting/rule")
             .get((req, res) => {
                 res.sendFile(servers.fileServer.RULE_FILE_PATH);
             })
@@ -96,7 +96,31 @@ exports.Init = function (servers, NovelLibrary) {
                 NovelLibrary.Loader.ChangeRule(req.body);
                 servers.fileServer.UpdateRuleFile(req.body)
                 res.send(`{"statu":"success"}`);
-            })
+            });
+
+        web.route("/api/setting/pdf").get((req, res) => {
+            res.send(JSON.stringify(NovelLibrary.SettingManager.pdf.get()));
+        }).put(bodyParser.json({ limit: '1mb' }), (req, res) => {
+            res.send(NovelLibrary.SettingManager.pdf.set(req.body));
+        });
+
+        web.get("/api/setting/font", (req, res) => {
+            servers.fileServer.GetFontFamily().then(fonts => {
+                res.send(JSON.stringify(fonts));
+            });
+        });
+
+        web.post("/api/setting/viewpdf", bodyParser.json({ limit: '1mb' }), (req, res) => {
+            // res.send(NovelLibrary.SettingManager.pdf.set(req.body));
+            const PDFCreater = require("./novel/pdf");
+            let tempFileName = "temp_" + new Date().getTime() + ".pdf";
+            PDFCreater.CreateWithSetting(req.body, req.body.text, servers.fileServer.TEMP_FILE_PATH + "/" + tempFileName);
+            res.send(tempFileName);
+        });
+
+        web.get("/view/pdf/:filename", (req, res) => {
+            res.sendFile(servers.fileServer.TEMP_FILE_PATH + "/" + req.params.filename);
+        });
     }
 }
 
