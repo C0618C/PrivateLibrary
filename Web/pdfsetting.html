@@ -53,6 +53,13 @@
                                             </div>
                                         </div>
                                         <div class="form-group row">
+                                            <label for="pdf_page_width" class="col-form-label">页面宽度</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" placeholder="页面宽度"
+                                                    id="pdf_page_width">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
                                             <label for="font_family" class="col-form-label">字体</label>
                                             <select class="form-control" id="font_family">
 
@@ -77,7 +84,7 @@
                                         </div>
                                         <div class="form-group row">
                                             <label for="font_size" class="col-form-label">预览文本</label>
-                                            <textarea class="form-control" id="viewText" rows="8"></textarea>
+                                            <textarea class="form-control" id="viewText" rows="12"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-9 ">
@@ -125,15 +132,17 @@
                     $("#pdf_start_y").val(result.paddingY);
                     $("#font_family").val(result.fontFamily);
                     $("#font_size").val(result.fontSize);
+                    $("#pdf_page_width").val(result.pageWidth);
                 }
             });
         }
         //更新
         function UpdateSetting() {
             var setting = {
-                paddingX: $("#pdf_start_x").val(),
-                paddingY: $("#pdf_start_y").val(),
-                fontSize: $("#font_size").val(),
+                paddingX: $("#pdf_start_x").val() * 1,
+                paddingY: $("#pdf_start_y").val() * 1,
+                pageWidth: $("#pdf_page_width").val() * 1,
+                fontSize: $("#font_size").val() * 1,
                 fontFamily: $("#font_family").val()
             }
             $.ajax({
@@ -148,9 +157,10 @@
         //预览
         function CreateAView() {
             var setting = {
-                paddingX: $("#pdf_start_x").val(),
-                paddingY: $("#pdf_start_y").val(),
-                fontSize: $("#font_size").val(),
+                paddingX: $("#pdf_start_x").val() * 1,
+                paddingY: $("#pdf_start_y").val() * 1,
+                pageWidth: $("#pdf_page_width").val() * 1,
+                fontSize: $("#font_size").val() * 1,
                 fontFamily: $("#font_family").val(),
                 text: $("#viewText").val()
             }

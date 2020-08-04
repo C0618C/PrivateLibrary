@@ -10,6 +10,7 @@ const defaultSetting = {
         paddingX: 10,
         paddingY: 10,
         fontSize: 26,
+        pageWidth: 580,
         fontFamily: ""
     },
     kindle: {
@@ -30,7 +31,12 @@ function SetSetting(setting, type) {
 
 
 function GetPdfSetting() {
-    return GetSeting("pdf");
+    let ps = GetSeting("pdf");
+    ps.paddingX *= 1;
+    ps.paddingY *= 1;
+    ps.pageWidth *= 1;
+    ps.fontSize *= 1;
+    return ps;
 }
 function SetPdfSetting(setting) {
     return SetSetting(setting, "pdf");

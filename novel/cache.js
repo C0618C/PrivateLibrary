@@ -108,7 +108,7 @@ class Cache {
     static GetSettingConfig(defSetting) {
         try {
             let curSetting = JSON.parse(fs.readFileSync(SYS_SETTING_FILE_PATH).toString());
-            if (defSetting) return Object.assign(defSetting, curSetting);
+            if (defSetting) return deepObjectMerge(defSetting, curSetting);
             else return curSetting;
         } catch (e) {
             this.SetSettingConfig(defSetting || {});
@@ -124,10 +124,19 @@ class Cache {
         let result = [];
         const dir = fs.opendirSync(FONT_DIR_PATH);
         for await (const dirent of dir) {
-            if (dirent.isFile() && /.ttf$/.test(dirent.name)) result.push(dirent.name);
+            //注意 TTC格式字体需要传入字体名称 如doc.font('fonts/Chalkboard.ttc', 'Chalkboard-Bold')
+            if (dirent.isFile() && /\.(ttf|otf|woff2?)$/.test(dirent.name)) result.push(dirent.name);
         }
         return result;
     }
+}
+
+function deepObjectMerge(FirstOBJ, SecondOBJ) { // 深度合并对象
+    for (var key in SecondOBJ) {
+        FirstOBJ[key] = FirstOBJ[key] && FirstOBJ[key].toString() === "[object Object]" ?
+            deepObjectMerge(FirstOBJ[key], SecondOBJ[key]) : FirstOBJ[key] = SecondOBJ[key];
+    }
+    return FirstOBJ;
 }
 
 exports.Cache = Cache;

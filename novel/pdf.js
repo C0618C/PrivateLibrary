@@ -19,9 +19,10 @@ function CreatePDFWithSetting(setting, text, filePaht) {
     try {
         setting.paddingX *= 1;
         setting.paddingY *= 1;
+        setting.pageWidth *= 1;
         setting.fontSize *= 1;
         const newDoc = CreateNewDoc(filePaht, setting);
-        newDoc.text(text, setting.paddingX, setting.paddingY).end();
+        newDoc.text(text, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).end();
     } catch (e) {
         console.log(e)
     }
@@ -41,7 +42,7 @@ function CreateNewDoc(filepath, setting) {
 function MakeFilesToADoc(files, doc) {
     files.forEach(file => {
         let context = fs.readFileSync(file.filepath).toString();
-        doc.text(context, pdfSetting.paddingX, pdfSetting.paddingY).addPage();
+        doc.text(context, pdfSetting.paddingX, pdfSetting.paddingY, { width: pdfSetting.pageWidth }).addPage();
     });
     doc.end();
 }
