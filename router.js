@@ -121,6 +121,12 @@ exports.Init = function (servers, NovelLibrary) {
         web.get("/view/pdf/:filename", (req, res) => {
             res.sendFile(servers.fileServer.TEMP_FILE_PATH + "/" + req.params.filename);
         });
+
+        web.route("/api/setting/kindle").get((req, res) => {
+            res.send(JSON.stringify(NovelLibrary.SettingManager.kindle.get()));
+        }).put(bodyParser.json({ limit: '1mb' }), (req, res) => {
+            res.send(NovelLibrary.SettingManager.kindle.set(req.body));
+        });
     }
 }
 

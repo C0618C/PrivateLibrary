@@ -14,7 +14,9 @@ const defaultSetting = {
         fontFamily: ""
     },
     kindle: {
-        email: ""
+        kindle_email: "",
+        email: "",
+        pass: ""
     }
 };
 
@@ -41,5 +43,14 @@ function GetPdfSetting() {
 function SetPdfSetting(setting) {
     return SetSetting(setting, "pdf");
 }
-
 exports.pdf = { get: GetPdfSetting, set: SetPdfSetting }
+
+
+
+function GetKindleSetting() {
+    return GetSeting("kindle");
+}
+function SetKindleSetting(setting) {
+    return SetSetting(setting, "kindle");
+}
+exports.kindle = { get: GetKindleSetting, set: SetKindleSetting }

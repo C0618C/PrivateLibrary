@@ -50,7 +50,7 @@
 
   <div class="row container-fluid p-0" id="main">
     <div class="col-2 p-0 ">
-      <div class="accordion" id="accordionExample">
+      <div class="accordion" id="mainNavBar">
         <div class="card">
           <div class="card-header" id="headingOne">
             <h2 class="mb-0">
@@ -61,7 +61,7 @@
             </h2>
           </div>
 
-          <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+          <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#mainNavBar">
             <div class="list-group">
               <a href="#" class="list-group-item list-group-item-action">书库情况</a>
               <a href="#" class="list-group-item list-group-item-action">施工中</a>
@@ -77,8 +77,8 @@
               </button>
             </h2>
           </div>
-          <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-            <div class="list-group" >
+          <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#mainNavBar">
+            <div class="list-group">
               <a href="#fssetting" class="list-group-item list-group-item-action">已下载文件管理</a>
               <a href="#" class="list-group-item list-group-item-action">临时文件管理</a>
               <!-- <a href="#" class="list-group-item list-group-item-action list-group-item-primary">施工中</a>
@@ -101,11 +101,12 @@
               </button>
             </h2>
           </div>
-          <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+          <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#mainNavBar">
             <div class="list-group">
               <a href="#rulesetting" class="list-group-item list-group-item-action">抓取规则设置</a>
               <a href="#readsetting" class="list-group-item list-group-item-action">阅读规则设置</a>
               <a href="#pdfsetting" class="list-group-item list-group-item-action">PDF规格设置</a>
+              <a href="#kindlesetting" class="list-group-item list-group-item-action">Kindle 设置</a>
             </div>
           </div>
         </div>
@@ -129,8 +130,11 @@
     })
     function Reload() {
       if (location.hash != "") {
+        var curObj = $(`a[href="${location.hash}"]`);
         $("#action_page").attr("src", "/page/" + location.hash.replace("#", ""));
-        $("title").text($("title").text().split("-")[0] + "-" + $(`a[href="${location.hash}"]`).text());
+        $("title").text($("title").text().split("-")[0] + "-" + curObj.text());
+        $("#mainNavBar .active").removeClass("active");
+        curObj.addClass("active");
       }
     }
   </script>
