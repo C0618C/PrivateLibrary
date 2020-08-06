@@ -66,6 +66,14 @@ function LoadNovelIndex(url, callback, useCache = true) {
 
         //载入目录页
         GetTextByURL(url, rule.encoding, (text, err) => {
+            if (err || text == null) {
+                //let msg = { done: jobDoneCount, count: dwChapterCount, url: curChapterSetting.url, isok: false };
+                //Servers.socketServer.emit("Novel/Downloading", novel.id, msg);           //通知出错了
+                //callback(true, true);//出错了 就等等再重启下载
+                console.error("抓目录失败了：", err.message);
+                return;
+            }
+
             //结果缓存进工程
             let n = ParseIndexPage(text, rule.index_page, path);
             let id = Solution.AddNewItem(url, n.title, n.chapters.length, true);
@@ -400,7 +408,8 @@ function GetTempPathByUrl(url) {
 /**
  * 解释某目录，收集书籍的章节信息
  * @param {string} text 网页源码
- * @param {object} rule 
+ * @param {object} rule 爬取规则设置
+ * @param {string} path 网站的服务器基准地址
  */
 function ParseIndexPage(text, rule, path) {
     let title;

@@ -55,6 +55,6 @@ function SendAMail({ callback, title, message, files, toMail }) {
 
 exports.Init = (setting) => {
     mailServerSetting = setting;
-    console.log(mailServerSetting);
+    // console.log(mailServerSetting);
 }
 exports.SendMail = SendAMail;
