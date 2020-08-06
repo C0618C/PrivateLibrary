@@ -3,7 +3,7 @@
 
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no,user-scalable=no" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" />
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
@@ -52,6 +52,10 @@
             position: sticky;
             top: 4rem;
             height: calc(100vh - 4rem);
+        }
+
+        #novel_text section{
+            margin-bottom: 80px;
         }
 
         @media screen and (max-width:1200px) {
@@ -131,7 +135,7 @@
                 success: (result) => {
                     $("#loading").remove();
                     //console.log(result);
-                    $("#novel_text").append($(`<section id="${result.cid.replace(".", "")}" class="shadow p-3 mb-5 bg-white rounded"></section>`).append(FormatContent(result.content, result.cid)))
+                    $("#novel_text").append($(`<section id="${result.cid.replace(".", "")}" class="shadow p-3 bg-white rounded"></section>`).append(FormatContent(result.content, result.cid)))
 
                     InitNavbar(result.chapters);
 
@@ -213,7 +217,7 @@
                 return callback();
             }
 
-            let cpDom = $(`<section id="${cpfile.replace(".", "")}" class="shadow p-3 mb-5 bg-white rounded"></section>`);
+            let cpDom = $(`<section id="${cpfile.replace(".", "")}" class="shadow p-3 bg-white rounded"></section>`);
             if (toword == "next") {
                 $("#novel_text").append(cpDom);
                 $("#endFile").val(cpfile);
