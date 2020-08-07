@@ -38,7 +38,9 @@
                                 <p>通过〖发送至Kindle〗电子邮件地址将生成的书籍发送至您的Kindle。这个邮件地址可以在Kindle上〖设置-您的账户〗中查看，也能在
                                     www.amazon.cn/myk 查看/更改相关设置。</p>
                                 <p>〖发件邮箱〗用于发送邮件，需要使用您的邮箱进行发送（通过SMTP），所以需要提供邮箱地址及认证码，以及邮箱服务器允许启用SMTP协议（部分邮箱默认关闭）。</p>
-                                <p>为防止垃圾邮件，您只能使用〖发送至Kindle〗电子邮箱来接收由已认可的电子邮箱发出的个人文件。请确保发邮件邮箱地址已在名单中，这需要在www.amazon.cn上设置。<a href="https://www.amazon.cn/gp/help/customer/display.html/ref=kinw_myk_wl_ln?ie=UTF8&nodeId=200767340" target="_blank">了解详情</a></p>
+                                <p>为防止垃圾邮件，您只能使用〖发送至Kindle〗电子邮箱来接收由已认可的电子邮箱发出的个人文件。请确保发邮件邮箱地址已在名单中，这需要在www.amazon.cn上设置。<a
+                                        href="https://www.amazon.cn/gp/help/customer/display.html/ref=kinw_myk_wl_ln?ie=UTF8&nodeId=200767340"
+                                        target="_blank">了解详情</a></p>
                             </blockquote>
                         </div>
                     </div>
@@ -62,7 +64,8 @@
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            发件邮箱设置
+                            发件邮箱设置 <button type="button" class="btn btn-success ml-5" id="btn_testmail"
+                                data-toggle="modal" data-target="#SendTestMail">发送测试邮件</button>
                         </div>
                         <div class="card-body">
                             <div class="form-group row">
@@ -92,21 +95,94 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="SendTestMail" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+        aria-labelledby="staticBackdropLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">发送测试邮件</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label text-right" for="mailto">收件人：</label>
+                            <div class="col-sm-10">
+                                <div class="form-row">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="mailto">
+                                    </div>
+                                </div>
+                            </div>
+                            <label class="col-sm-2 col-form-label text-right" for="title">主题：</label>
+                            <div class="col-sm-10">
+                                <div class="form-row">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="title" value='这是测试邮件'>
+                                    </div>
+                                </div>
+                            </div>
+                            <label class="col-sm-2 col-form-label text-right" for="content">内容：</label>
+                            <div class="col-sm-10">
+                                <div class="form-row">
+                                    <div class="input-group">
+                                        <textarea class="form-control" id="content">    这是测试邮件，若你能在收件人邮箱中看到本邮件，则 SMTP 已配置正确并能正常使用。
+                                        </textarea>
+                                    </div>
+                                </div>
+                            </div>
 
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="send_mail_now">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
         $(() => {
 
             $("#btn_save").on("click", UpdateSetting);
 
+            $("#kindle_email").on("change", (e) => {
+                $("#mailto").val(e.target.value);
+            });
+            $("#send_mail_now").on("click", () => {
+                SendEMail({
+                    sender: $("#email").val(),
+                    pass: $("#email_pass").val(),
+                    mailto: $("#mailto").val(),
+                    title: $("#title").val(),
+                    content: $("#content").val(),
+                    files: [{
+                        filename: "测试附件文件.txt",
+                        content: "这是通过测试邮件发送而来的附件，若您在Kindle看到这个文件，则证明Kindle电子邮箱配置正确，已认可的电子邮箱列表配置正确。\n" + $("#content").val(),
+                        contentType: 'text/plain'
+                    }],
+                    callback: (result) => {
+                        $('#SendTestMail').modal('hide');
+                        if (result.result) {
+                            Success("邮件已发送，请往收件箱检查。", "发送成功", 1800);
+                        } else {
+                            Alert("请检查所有配置，并留意系统提示。", "发送失败", 1800);
+                        }
+                    }
+                })
+            })
             GetSetting();
         });
         function GetSetting() {
             $.ajax({
                 url: "/api/setting/kindle", method: "GET", dataType: "json",
                 success: (result) => {
-                    console.log(result);
                     $("#kindle_email").val(result.kindle_email);
+                    $("#mailto").val(result.kindle_email);
                     $("#email").val(result.email);
                     $("#email_pass").val(result.pass);
                 }

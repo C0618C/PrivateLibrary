@@ -3,10 +3,12 @@ const pdfSetting = require("./setting").pdf.get();
 const fs = require('fs');
 
 function CreatePDF(target, newFileName) {
-    // let ct = fs.readFileSync(filePath).toString();
-    // CreateWithContext(ct, newFileName);
+    let fileInfo = {
+        filename: newFileName + ".pdf",
+        path: "book/" + newFileName + '.pdf'
+    };
     try {
-        const newDoc = CreateNewDoc("book/" + newFileName + '.pdf');
+        const newDoc = CreateNewDoc(fileInfo.path);
 
         if (Array.isArray(target)) {
             MakeFilesToADoc(target, newDoc);
@@ -14,6 +16,8 @@ function CreatePDF(target, newFileName) {
     } catch (e) {
         console.log(e)
     }
+
+    return fileInfo;
 }
 function CreatePDFWithSetting(setting, text, filePaht) {
     try {

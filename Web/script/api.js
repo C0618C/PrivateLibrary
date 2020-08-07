@@ -51,6 +51,19 @@ function UpdateRuleSetting(setting, callback) {
     });
 }
 
+/**
+ * 发送邮件
+ * @param {object} param0 
+ */
+function SendEMail({title,content,sender,mailto,files,callback,pass}) {
+    $.ajax({
+        url: "/api/email/send", method: "POST", dataType: "json", contentType: 'application/json', data: JSON.stringify({title,content,sender,mailto,files,pass}),
+        success: (result) => {
+            if (callback) callback(result);
+        }
+    });
+}
+
 
 /*** UI、通知的工共API ***/
 
@@ -98,8 +111,7 @@ function ShowModalDialog({ title, body, buttons, callback, initfn }) {
         </div>
       </div>
     </div>
-  </div>    
-    `);
+  </div>`);
 
     if (initfn) initfn(dialog);         //Dom类初始化
 

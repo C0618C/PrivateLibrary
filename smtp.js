@@ -6,55 +6,53 @@ let mailServerSetting = {};
 //setup the transporter
 
 
-function GetServer() {
-    return mailServerSetting.email.match(/(?<=@)[^.]+/)[0];
+function GetServer(user) {
+    return user.match(/(?<=@)[^.]+/)[0];
 }
 
-function CreateTransport() {
+function CreateTransport(user, pass) {
     let setting = {
-        service: "",
+        service: GetServer(mailServerSetting.email),
         auth: {
-            user: "",
-            pass: ""
+            user: mailServerSetting.email,
+            pass: mailServerSetting.pass
         }
     };
-    setting.service = GetServer();
-    setting.service.auth.user = mailServerSetting.email;
-    setting.service.auth.pass = mailServerSetting.pass;
+    if (user && pass) {
+        setting.service = GetServer(user);
+        setting.auth.user = user;
+        setting.auth.pass = pass;
+    }
     return nodemailer.createTransport(smtpTransport(setting));
 }
 
-function SendAMail({ callback, title, message, files, toMail }) {
+function SendAMail({ callback, title, content, files, mailto, sender, pass }) {
     var mailOptions = {
-        from: mailServerSetting.email,
-        to: toMail || mailServerSetting.kindle_email,
+        from: sender || mailServerSetting.email,
+        to: mailto || mailServerSetting.kindle_email,
         subject: title || "Send the mail by default",
-        text: message || "This e-mail sent by PrivateLibrary!"
+        text: content || "This e-mail sent by PrivateLibrary!"
     };
 
     //添加附件
-    if (files) {
+    if (files) {        //NOTE: 这儿回有将服务器任意文件通过邮件发出去的bug，会泄露服务器信息。
         mailOptions.attachments = [];
         files.forEach(ff => {
-            mailOptions.attachments.push({
-                filename: ff.filename,
-                path: ff.path
-            });
+            mailOptions.attachments.push(ff);
         });
     }
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    CreateTransport(sender, pass).sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
+            if (callback) callback(false, error);
         } else {
-            //console.log('Email Sent ');
-            if (callback) callback();
+            if (callback) callback(true);
         }
     });
 }
 
 exports.Init = (setting) => {
     mailServerSetting = setting;
-    // console.log(mailServerSetting);
 }
 exports.SendMail = SendAMail;

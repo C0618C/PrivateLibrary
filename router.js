@@ -127,6 +127,17 @@ exports.Init = function (servers, NovelLibrary) {
         }).put(bodyParser.json({ limit: '1mb' }), (req, res) => {
             res.send(NovelLibrary.SettingManager.kindle.set(req.body));
         });
+
+        web.post("/api/email/send", bodyParser.json({ limit: '1mb' }), (req, res) => {
+            let mail = req.body;
+            mail.callback = (result, err) => {
+                res.send(JSON.stringify({
+                    result: result,
+                    err: err && err.message
+                }));
+            }
+            servers.MailServer.SendMail(mail);
+        });
     }
 }
 

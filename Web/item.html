@@ -96,7 +96,7 @@
                     <input type="radio" name="click_action" id="ca_1" value="1" checked /><label for="ca_1"
                         title="选中的复选框开始，后面的复选框均会被选中。">从此以后</label>
                     <input type="radio" name="click_action" id="ca_2" value="2" /><label for="ca_2">当前而已</label>
-                    <input type="checkbox" id="iscompress"/><label for="iscompress">下载后合并</label>
+                    <input type="checkbox" id="iscompress" /><label for="iscompress">生成TXT</label>
                     <input type="checkbox" id="printPdf" /><label for="printPdf">生成PDF</label>
                     <input type="checkbox" id="sendmail" /><label for="sendmail">完成后发送到Kindle邮箱</label>
                     <input type="hidden" id="host" value="" />
@@ -237,6 +237,7 @@
             let title = $("#novel_title").text();
             let iscompress = $("#iscompress").prop("checked");
             let printPdf = $("#printPdf").prop("checked");
+            let sendmail = $("#sendmail").prop("checked");
             let items = $("[id^=cp_]:checked:checked");
 
             if (items.length == 0) {
@@ -258,7 +259,8 @@
                 host: host,
                 title: $("#novel_title").text(),
                 iscompress: iscompress,
-                printPdf: printPdf
+                printPdf: printPdf,
+                sendmail: sendmail
             }
             console.log("请求下载", param)
             socket.emit("Novel/Download", param);

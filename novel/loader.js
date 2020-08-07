@@ -205,15 +205,33 @@ function DownloadNovel(novel) {
                     return;
                 }
 
+                let pdfFile;
                 if (novel.printPdf) {
                     console.log("开始合并PDF文件！！")
-                    PDFCreater.Create(checkChapters, novel.title + "_" + new Date().getTime())
-                    Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
+                    pdfFile = PDFCreater.Create(checkChapters, novel.title + "_" + new Date().getTime());
+                    if (!novel.sendmail) {
+                        Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
+                        return;
+                    }
+                }
+
+                if (novel.sendmail) {       //需要发送文件
+                    Servers.MailServer.SendMail({
+                        title: pdfFile.filename,
+                        content: "本文件通过 PrivateLibrary 自动生成并发送。",
+                        files: [pdfFile],
+                        callback: (result, err) => {
+                            if (result) {
+                                Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
+                            } else {
+                                console.error("尝试发送邮件失败:", err);
+                            }
+                        }
+                    });
                     return;
                 }
 
                 Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
-                console.log("所有任务已完成：", novel.title);
             }
             let sleep_time = jobDoneCount % 5 == 0 ? t_sleep_time * 3 : t_sleep_time;//增加弹性等待时间 防止爬太快出错
             setTimeout(_runner, needWait ? sleep_time : 0);
