@@ -33,6 +33,9 @@ exports.Init = function (servers, NovelLibrary) {
     web.get("/setting", (req, res) => {
         res.sendFile(WebRoot + "/setting.html");
     });
+    web.get("/favicon.ico", (req, res) => {
+        res.sendFile(WebRoot + "/img/libraries-32.ico");
+    });
 
 
 

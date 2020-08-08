@@ -125,7 +125,7 @@ class Cache {
         const dir = fs.opendirSync(FONT_DIR_PATH);
         for await (const dirent of dir) {
             //注意 TTC格式字体需要传入字体名称 如doc.font('fonts/Chalkboard.ttc', 'Chalkboard-Bold')
-            if (dirent.isFile() && /\.(ttf|otf|woff2?)$/.test(dirent.name)) result.push(dirent.name);
+            if (dirent.isFile() && /\.(ttf|otf|woff2?|fon)$/i.test(dirent.name)) result.push(dirent.name);
         }
         return result;
     }
