@@ -53,7 +53,7 @@ class Cache {
     static CheckFile(filepath) {
         try {
             let fileStatus = fs.statSync(filepath);
-            return fileStatus.isFile() && fileStatus.size > 0;
+            return fileStatus.isFile() && fileStatus.size > 20;
         } catch (err) {
             // console.warn(err);
             return false;

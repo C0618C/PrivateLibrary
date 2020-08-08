@@ -417,7 +417,7 @@ function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
 
 function GetTempPathByUrl(url) {
     let host = GetHost(url);
-    return Cache.TEMP_FILE_PATH + url.substr(url.indexOf(host) + host.length).replace(/[\/\\\.\?\#]/g, "");
+    return Cache.TEMP_FILE_PATH + "/" + url.substr(url.indexOf(host) + host.length).replace(/[\/\\\.\?\#]/g, "");
 }
 
 
