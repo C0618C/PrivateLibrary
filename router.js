@@ -16,6 +16,9 @@ exports.Init = function (servers, NovelLibrary) {
     web.get("/page/:filename", (req, res) => {
         res.sendFile(WebRoot + `/${req.params.filename}.html`);
     });
+    web.get("/img/:filename", (req, res) => {
+        res.sendFile(WebRoot + `/img/${req.params.filename}`);
+    });
 
     /*** Web服务 ***/
     //具体某个小说页

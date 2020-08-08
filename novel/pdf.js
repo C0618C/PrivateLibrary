@@ -1,5 +1,5 @@
 const PDFDocument = require('pdfkit');
-const pdfSetting = require("./setting").pdf.get();
+const pdfSetting = require("./setting").pdf;
 const fs = require('fs');
 
 function CreatePDF(target, newFileName) {
@@ -35,7 +35,7 @@ function CreatePDFWithSetting(setting, text, filePaht) {
 
 
 function CreateNewDoc(filepath, setting) {
-    setting = setting || pdfSetting;
+    setting = setting || pdfSetting.get();
     const doc = new PDFDocument();
     doc.pipe(fs.createWriteStream(filepath));
     if (setting.fontFamily) doc.font('font/' + setting.fontFamily);
@@ -44,9 +44,10 @@ function CreateNewDoc(filepath, setting) {
 }
 
 function MakeFilesToADoc(files, doc) {
+    setting = pdfSetting.get();
     files.forEach(file => {
         let context = fs.readFileSync(file.filepath).toString();
-        doc.text(context, pdfSetting.paddingX, pdfSetting.paddingY, { width: pdfSetting.pageWidth }).addPage();
+        doc.text(context, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).addPage();
     });
     doc.end();
 }
