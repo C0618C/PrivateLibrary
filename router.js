@@ -13,10 +13,14 @@ exports.Init = function (servers, NovelLibrary) {
     web.get("/script/:filename", (req, res) => {
         res.sendFile(WebRoot + `/script/${req.params.filename}.js`);
     });
+    //动态的样式文件
     web.get("/style/:filename", (req, res) => {
         let fileName = req.params.filename;
+        // res.set('Content-Type', 'text/css; charset=UTF-8');
+        // res.set('Content-Type22', 'text/css; charset=UTF-8');
+        res.type('css');
         if (/(.*).acss$/.test(fileName)) {
-            let action = require(WebRoot + `/style/action/` + RegExp.$1);
+            let action = require(WebRoot + `/style/active/` + RegExp.$1);
             action.exec(req).then((result) => res.send(result));
         }
         else
@@ -30,7 +34,6 @@ exports.Init = function (servers, NovelLibrary) {
     });
     web.get("/fonts/:filename", (req, res) => {
         res.sendFile(`${servers.fileServer.FONT_DIR_PATH}/${req.params.filename}`);
-        console.log("请求了字体" + req.params.filename);
     });
 
     /*** Web服务 ***/
