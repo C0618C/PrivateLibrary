@@ -120,6 +120,9 @@ class Cache {
         fs.writeFileSync(SYS_SETTING_FILE_PATH, JSON.stringify(setting));
     }
 
+    /**
+     * 取得所有字体文件名称
+     */
     static async GetFontFamily() {
         let result = [];
         const dir = fs.opendirSync(FONT_DIR_PATH);

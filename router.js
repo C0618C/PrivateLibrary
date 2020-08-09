@@ -13,11 +13,24 @@ exports.Init = function (servers, NovelLibrary) {
     web.get("/script/:filename", (req, res) => {
         res.sendFile(WebRoot + `/script/${req.params.filename}.js`);
     });
+    web.get("/style/:filename", (req, res) => {
+        let fileName = req.params.filename;
+        if (/(.*).acss$/.test(fileName)) {
+            let action = require(WebRoot + `/style/action/` + RegExp.$1);
+            action.exec(req).then((result) => res.send(result));
+        }
+        else
+            res.sendFile(WebRoot + `/style/${fileName}`);
+    });
     web.get("/page/:filename", (req, res) => {
         res.sendFile(WebRoot + `/${req.params.filename}.html`);
     });
     web.get("/img/:filename", (req, res) => {
         res.sendFile(WebRoot + `/img/${req.params.filename}`);
+    });
+    web.get("/fonts/:filename", (req, res) => {
+        res.sendFile(`${servers.fileServer.FONT_DIR_PATH}/${req.params.filename}`);
+        console.log("请求了字体" + req.params.filename);
     });
 
     /*** Web服务 ***/
