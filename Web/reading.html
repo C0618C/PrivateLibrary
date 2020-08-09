@@ -141,7 +141,22 @@
                                     <option>微软雅黑</option>
                                 </select>
                             </div>
-                            <!-- <input type="text" class="form-control" id="title" value='这是测试邮件'> -->
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label text-right" for="font_weight">粗细：</label>
+                            <div class="col-sm-10 form-group row">
+                                <select class="form-control" id="font_weight">
+                                    <option>100</option>
+                                    <option>200</option>
+                                    <option>300</option>
+                                    <option>400</option>
+                                    <option selected>500</option>
+                                    <option>600</option>
+                                    <option>700</option>
+                                    <option>800</option>
+                                    <option>900</option>
+                                </select>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -205,11 +220,12 @@
                 }
             });
 
+            let curSetting = GetReadingSetting();
+            $("#font_weight").val(curSetting.fontWeight)
             //加载字体控件选项
             $.ajax({
                 url: "/api/setting/font", method: "GET", dataType: "json",
                 success: (result) => {
-                    let curSetting = GetReadingSetting();
                     var fontSel = $("#font_family");
                     result.forEach(element => {
                         let fontName = btoa(encodeURIComponent(element));
@@ -221,10 +237,11 @@
             });
 
             $("#send_mail_now").on("click", () => {
-                var curSetting = GetReadingSetting();
-                curSetting.fontFamily = $("#font_family").val();
-                InitReadingSetting(curSetting);
-                SaveReadingSetting(curSetting);
+                var theSetting = GetReadingSetting();
+                theSetting.fontFamily = $("#font_family").val();
+                theSetting.fontWeight = $("#font_weight").val();
+                InitReadingSetting(theSetting);
+                SaveReadingSetting(theSetting);
 
             });
 
@@ -240,9 +257,9 @@
         }
 
         function InitReadingSetting(setting) {
-            if (setting.fontFamily) {
-                $("#novel_text").css("font-family", setting.fontFamily);
-            }
+            let context = $("#novel_text")
+            if (setting.fontFamily) context.css("font-family", setting.fontFamily);
+            if (setting.fontWeight) context.css("font-weight", setting.fontWeight);
         }
 
         function FormatContent(content) {
