@@ -167,12 +167,8 @@
             $.ajax({
                 url: "/api/setting/viewpdf", method: "POST", dataType: "text", contentType: 'application/json', data: JSON.stringify(setting),
                 success: (result) => {
-                    //if (callback) callback(result);
                     console.log("/view/pdf/" + result);
-                    //TODO: 修正延时的做法
-                    setTimeout(() => {
-                        $("#pdf_viwer").attr("src", "/view/pdf/" + result);
-                    }, 3000);
+                    $("#pdf_viwer").attr("src", "/view/pdf/" + result);
                 }
             });
         }

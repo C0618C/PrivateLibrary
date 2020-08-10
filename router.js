@@ -136,8 +136,9 @@ exports.Init = function (servers, NovelLibrary) {
             // res.send(NovelLibrary.SettingManager.pdf.set(req.body));
             const PDFCreater = require("./novel/pdf");
             let tempFileName = "temp_" + new Date().getTime() + ".pdf";
-            PDFCreater.CreateWithSetting(req.body, req.body.text, servers.fileServer.TEMP_FILE_PATH + "/" + tempFileName);
-            res.send(tempFileName);
+            PDFCreater.CreateWithSetting(req.body, req.body.text, servers.fileServer.TEMP_FILE_PATH + "/" + tempFileName,(fileInfo)=>{
+                res.send(tempFileName);
+            });
         });
 
         web.get("/view/pdf/:filename", (req, res) => {
