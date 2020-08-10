@@ -151,7 +151,7 @@ function DownloadNovel(novel) {
         }
 
         //解释小说，提取正文
-        GetTextByURL(host + curChapterSetting.url, rule.encoding, (text, err) => {
+        GetTextByURL(/^https?/.test(curChapterSetting.url) ? curChapterSetting.url : host + curChapterSetting.url, rule.encoding, (text, err) => {
             if (err || text == null) {
                 let msg = { done: jobDoneCount, count: dwChapterCount, url: curChapterSetting.url, isok: false };
                 Servers.socketServer.emit("Novel/Downloading", novel.id, msg);           //通知出错了
@@ -449,7 +449,7 @@ function ParseIndexPage(text, rule, path) {
                 let item = $(cItems[i]);
                 let cp_url = QS_GetValueBySetting(item, rule.chapters.url);
 
-                if (!cp_url.startsWith("/")) {
+                if (!cp_url.startsWith("/") && !/^https?:\/\//.test(cp_url)) {
                     cp_url = basePath + cp_url;
                     // console.log(basePath, cp_url);           //小说目录地址出错时排查
                 }

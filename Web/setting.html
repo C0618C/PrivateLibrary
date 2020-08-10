@@ -125,7 +125,10 @@
     function Reload() {
       if (location.hash != "") {
         var curObj = $(`a[href="${location.hash}"]`);
-        $("#action_page").attr("src", "/page/" + location.hash.replace("#", ""));
+
+        const page = location.hash.replace("#", "");
+        $("#action_page").attr("src", `/page/${page}${window.location.search}`);
+
         $("title").text($("title").text().split("-")[0] + "-" + curObj.text());
         $("#mainNavBar .active").removeClass("active");
         curObj.addClass("active");
