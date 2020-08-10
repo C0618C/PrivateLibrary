@@ -2,7 +2,7 @@ const PDFDocument = require('pdfkit');
 const pdfSetting = require("./setting").pdf;
 const fs = require('fs');
 
-function CreatePDF(target, newFileName, calllback) {
+function CreatePDF(target, newFileName, callback) {
     let fileInfo = {
         filename: newFileName + ".pdf",
         path: "book/" + newFileName + '.pdf'
@@ -12,9 +12,11 @@ function CreatePDF(target, newFileName, calllback) {
 
         if (Array.isArray(target)) {
             MakeFilesToADoc(target, newDoc.doc);
+            console.log("【PDF】所有章节已安排生成");
         }
 
         newDoc.stream.on('finish', function () {
+            console.log("【PDF】PDF文件输出已完成！", fileInfo)
             if (callback) callback(fileInfo)
         });
     } catch (e) {

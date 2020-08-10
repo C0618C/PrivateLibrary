@@ -198,7 +198,7 @@ function DownloadNovel(novel) {
                     return;
                 }
 
-//TODO: 合并TXT和合并PDF应该是一种组合，即，可以是合并TXT后发txt到kindle ，也可以是合并pdf后发pdf 更可以同时发 需要处理
+                //TODO: 合并TXT和合并PDF应该是一种组合，即，可以是合并TXT后发txt到kindle ，也可以是合并pdf后发pdf 更可以同时发 需要处理
 
 
                 if (novel.iscompress) {//选择了合并
@@ -211,19 +211,19 @@ function DownloadNovel(novel) {
 
                 if (novel.printPdf) {
                     console.log("开始合并PDF文件！！")
-                    PDFCreater.Create(checkChapters, novel.title + "_" + new Date().getTime(), (fileInfo,err) => {  //filename: string; path: string
-                        if(err){ return; }//生成PDF失败了
+                    PDFCreater.Create(checkChapters, novel.title + "_" + new Date().getTime(), (fileInfo, err) => {  //filename: string; path: string
+                        if (err) { return; }//生成PDF失败了
 
                         if (!novel.sendmail) {      //不需要发文件到邮箱
                             Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
                             return;
                         }
 
-                        if (novel.sendmail) {       //需要发送文件
+                        if (novel.sendmail) {       //需要发送文件 
                             Servers.MailServer.SendMail({
-                                title: pdfFile.filename,
+                                title: fileInfo.filename,
                                 content: "本文件通过 PrivateLibrary 自动生成并发送。",
-                                files: [pdfFile],
+                                files: [fileInfo],
                                 callback: (result, err) => {
                                     if (result) {
                                         Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
