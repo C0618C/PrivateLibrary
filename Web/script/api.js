@@ -55,9 +55,9 @@ function UpdateRuleSetting(setting, callback) {
  * 发送邮件
  * @param {object} param0 
  */
-function SendEMail({title,content,sender,mailto,files,callback,pass}) {
+function SendEMail({ title, content, sender, mailto, files, callback, pass }) {
     $.ajax({
-        url: "/api/email/send", method: "POST", dataType: "json", contentType: 'application/json', data: JSON.stringify({title,content,sender,mailto,files,pass}),
+        url: "/api/email/send", method: "POST", dataType: "json", contentType: 'application/json', data: JSON.stringify({ title, content, sender, mailto, files, pass }),
         success: (result) => {
             if (callback) callback(result);
         }
@@ -66,8 +66,6 @@ function SendEMail({title,content,sender,mailto,files,callback,pass}) {
 
 
 /*** UI、通知的工共API ***/
-
-
 function NoticeMessage(message, title, { type, delayMS } = { type: "primary", delayMS: 0 }) {
     let msgBox = $(`<div class="alert alert-${type} fixed-top" role="alert"><strong>${title}</strong>${message} <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>`);
     $("body").append(msgBox);
@@ -75,7 +73,7 @@ function NoticeMessage(message, title, { type, delayMS } = { type: "primary", de
         msgBox.remove();
         msgBox = null;
     })
-    if (delayMS != 0) setTimeout(() => { msgBox.remove(); }, delayMS);
+    if (delayMS != 0) setTimeout(() => msgBox && msgBox.remove(), delayMS);
 }
 function Alert(message, title, delayMS = 0) {
     if (title == undefined) title = "警告："
@@ -96,6 +94,10 @@ function Info(message, title, delayMS = 0) {
 }
 
 
+/**
+ * 模态窗口
+ * @param {*} param0 
+ */
 function ShowModalDialog({ title, body, buttons, callback, initfn }) {
     let dialog = $(`
     <div class="modal fade" id="modalWin" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel">
