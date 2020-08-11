@@ -63,7 +63,6 @@ function CreateNewDoc(filepath, setting) {
     const stream = fs.createWriteStream(filepath);
     doc.pipe(stream);
     if (setting.fontFamily) doc.font('font/' + setting.fontFamily);
-    else doc.font("微软雅黑");              //防止没设置字体导致乱码        //NOTE：需要兼容MAC和Linux的方案
     if (setting.fontSize) doc.fontSize(setting.fontSize);
     return { doc, stream };
 }
@@ -80,3 +79,8 @@ function MakeFilesToADoc(files, doc) {
 console.log("pdf.js")
 exports.Create = CreatePDF;
 exports.CreateWithSetting = CreatePDFWithSetting;
+
+//确认当前PDF配置是否有致命错误
+exports.CheckSetting = () => {
+    return pdfSetting.get().fontFamily && pdfSetting.get().fontFamily != "";
+}

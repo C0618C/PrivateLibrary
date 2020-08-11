@@ -25,9 +25,10 @@
                 <form id="setting_form">
                     <div class="card bg-light">
                         <div class="card-body">
+                            <button type="reset" class="btn btn-primary" id="btn_default">恢复默认</button>
                             <button type="button" class="btn btn-success" id="btn_save">保存</button>
                             <button type="button" class="btn btn-primary" id="btn_view">生成预览</button>
-                            <button type="reset" class="btn btn-primary" id="btn_default">恢复默认</button>
+                            <button type="button" class="btn btn-primary" id="btn_sendfile">发送预览到Kindle</button>
                         </div>
                     </div>
                     <div class="card">
@@ -42,28 +43,35 @@
                                             <label for="pdf_start_x" class="col-form-label">左右边距</label>
                                             <div class="input-group">
                                                 <input type="number" class="form-control" placeholder="左右边距"
-                                                    id="pdf_start_x">
+                                                    id="pdf_start_x" value="20">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="pdf_start_y" class="col-form-label">上下边距</label>
                                             <div class="input-group">
                                                 <input type="number" class="form-control" placeholder="上下边距"
-                                                    id="pdf_start_y">
+                                                    id="pdf_start_y" value="10">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="pdf_page_width" class="col-form-label">页面宽度</label>
                                             <div class="input-group">
                                                 <input type="number" class="form-control" placeholder="页面宽度"
-                                                    id="pdf_page_width">
+                                                    id="pdf_page_width" value="580">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="font_family" class="col-form-label">字体</label>
-                                            <select class="form-control" id="font_family">
+                                            <div class="input-group mb-3">
 
-                                            </select>
+                                                <select class="form-control" id="font_family">
+
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <a class="btn btn-outline-secondary" href="/setting#fontsetting"
+                                                        target="_top">管理</a>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="font_size" class="col-form-label">字号</label>
@@ -111,6 +119,7 @@
 
             $("#btn_save").on("click", UpdateSetting);
             $("#btn_view").on("click", CreateAView);
+            $("#btn_sendfile").on("click", SendTheView);
             $.ajax({
                 url: "/api/setting/font", method: "GET", dataType: "json",
                 success: (result) => {
@@ -155,7 +164,35 @@
         }
 
         //预览
-        function CreateAView() {
+        function CreateAView(callback) {
+            var setting = GetPDFSetting();
+
+            $.ajax({
+                url: "/api/setting/viewpdf", method: "POST", dataType: "text", contentType: 'application/json', data: JSON.stringify(setting),
+                success: (result) => {
+                    console.log("/view/pdf/" + result);
+                    $("#pdf_viwer").attr("src", "/view/pdf/" + result);
+
+                    if (callback) callback(null, true);
+                }
+            });
+        }
+
+        function SendTheView(event, runNow) {
+            var file = $("#pdf_viwer").attr("src");
+            if ((!file || file == "about:blank") && !runNow) {
+                CreateAView(SendTheView);
+                return;
+            } else {
+                SendEMail({
+                    title: "PDF显示效果预览", content: JSON.stringify(GetPDFSetting()), files: [{ filename: `测试预览文件${new Date().getTime()}.pdf`, path: file, isRelativeFile: true }], callback: (rsl) => {
+                        Warning(JSON.stringify(rsl), "邮件发送结果");
+                    }
+                });
+            }
+        }
+
+        function GetPDFSetting() {
             var setting = {
                 paddingX: $("#pdf_start_x").val() * 1,
                 paddingY: $("#pdf_start_y").val() * 1,
@@ -164,13 +201,12 @@
                 fontFamily: $("#font_family").val(),
                 text: $("#viewText").val()
             }
-            $.ajax({
-                url: "/api/setting/viewpdf", method: "POST", dataType: "text", contentType: 'application/json', data: JSON.stringify(setting),
-                success: (result) => {
-                    console.log("/view/pdf/" + result);
-                    $("#pdf_viwer").attr("src", "/view/pdf/" + result);
-                }
-            });
+
+            if (setting.text == "") {
+                setting.text = "Test Start 测试开始：\n\n这是默认的文字测试预览文本，请修改【预览文本】以改变本段文本内容。\nABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n\n\nThe End 测试结束"
+                $("#viewText").val(setting.text);
+            }
+            return setting;
         }
 
     </script>

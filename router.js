@@ -2,7 +2,10 @@ const bodyParser = require('body-parser');
 
 const WebRoot = __dirname + "/Web";
 
+let _servers;
+
 exports.Init = function (servers, NovelLibrary) {
+    _servers = servers;
     let web = servers.webServer;
     // 创建 application/x-www-form-urlencoded 编码解析
     var urlencodedParser = bodyParser.urlencoded({ extended: false })
@@ -136,7 +139,7 @@ exports.Init = function (servers, NovelLibrary) {
             // res.send(NovelLibrary.SettingManager.pdf.set(req.body));
             const PDFCreater = require("./novel/pdf");
             let tempFileName = "temp_" + new Date().getTime() + ".pdf";
-            PDFCreater.CreateWithSetting(req.body, req.body.text, servers.fileServer.TEMP_FILE_PATH + "/" + tempFileName,(fileInfo)=>{
+            PDFCreater.CreateWithSetting(req.body, req.body.text, servers.fileServer.TEMP_FILE_PATH + "/" + tempFileName, (fileInfo) => {
                 res.send(tempFileName);
             });
         });
@@ -159,9 +162,20 @@ exports.Init = function (servers, NovelLibrary) {
                     err: err && err.message
                 }));
             }
+
+            if (mail.files) {
+                mail.files.forEach(file => {
+                    if (file.isRelativeFile) {
+                        file.path = ServerMapPath(file.path);
+                    }
+                });
+            }
+
             servers.MailServer.SendMail(mail);
         });
     }
+
+    servers.MapPath = ServerMapPath;
 }
 
 //Socket通信的应答
@@ -182,4 +196,16 @@ exports.socketApi = function (socket, socketServer, NovelLibrary) {
         NovelLibrary.Loader.DownloadNovel(novel);
     });
 
+}
+
+
+function ServerMapPath(urlPath) {
+    console.log("要找到这个地址", urlPath);
+
+    //TODO: 这儿应该根据路由规则实现，而不是写对照表
+    if (urlPath.startsWith("/view/pdf/")) {
+        urlPath = _servers.fileServer.TEMP_FILE_PATH + "/" + urlPath.replace("/view/pdf/", "");
+    }
+
+    return urlPath;
 }

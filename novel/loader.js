@@ -124,6 +124,12 @@ function DownloadNovel(novel) {
         return;
     }
 
+    if(novel.printPdf && !PDFCreater.CheckSetting()){
+        console.error("启用了生成PDF，但没设定具体字体，这将会导致乱码（PDF默认字体没有支持中文的）请到设置 -> PDF设置指定使用字体。");
+        console.log("所有进程已停止");
+        return;
+    }
+
     /**
      * 单篇文章下载器
      * @param {*} chapterSetting 
