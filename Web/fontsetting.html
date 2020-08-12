@@ -32,20 +32,15 @@
                     </div>
                     <div class="input-group is-invalid">
                         <div class="custom-file">
-                            <input type="file" class="custom-file-input" id="validatedInputGroupCustomFile" required>
-                            <label class="custom-file-label" for="validatedInputGroupCustomFile"
-                                data-browse="选择文件">选择字体文件</label>
+                            <input type="file" class="custom-file-input" id="upload_font_files" required multiple
+                                accept=".ttf,.otf,.woff,.woff2,.fon">
+                            <label class="custom-file-label" for="upload_font_files" data-browse="选择文件">选择字体文件</label>
                         </div>
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">上传</button>
+                            <button class="btn btn-outline-secondary" type="button" id="upload_file">上传</button>
                         </div>
                     </div>
                     <div class="invalid-feedback">部分字体在浏览器上不能正确显示，但可以在PDF中使用。可通过打印预览测试。</div>
-
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="customFile">
-                        <label class="custom-file-label" for="customFile">Choose file</label>
-                    </div>
                 </div>
                 <div class="card">
                     <div class="card-header">
@@ -61,14 +56,15 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
-        $.ajax({
-            url: "/api/setting/font", method: "GET", dataType: "json",
-            success: (result) => {
-                var fontSel = $("#my_fonts");
-                result.forEach(element => {
-                    let fontName = btoa(encodeURIComponent(element));
-                    fontName = "fn" + fontName.replace(/[=+]/g, "");
-                    fontSel.append(`<div class="card" style="width:22em;">
+        $(function () {
+            $.ajax({
+                url: "/api/setting/font", method: "GET", dataType: "json",
+                success: (result) => {
+                    var fontSel = $("#my_fonts");
+                    result.forEach(element => {
+                        let fontName = btoa(encodeURIComponent(element));
+                        fontName = "fn" + fontName.replace(/[=+]/g, "");
+                        fontSel.append(`<div class="card" style="width:22em;">
   <div class="card-header">${element}</div>
   <div class="card-body" style="font-family:${fontName};">
     <h5 class="card-title">${element}</h5>
@@ -81,21 +77,26 @@
     <a href="#" class="btn btn-danger">删除</a>
   </div>
 </div>`);
-                });
-            }
-        });
+                    });
+                }
+            });
 
-        $(function () {
             $("input[type=file]").on("change", (e) => {
-                console.log(e.target);
-                console.log(e)
                 var fileName = [];
-                for(var file of e.target.files){
+                for (var file of e.target.files) {
                     fileName.push(file.name);
                 };
                 $(`label[for="${e.target.id}"]`).text(fileName.join(","))
-            })
-        })
+            });
+
+            $("#upload_file").on("click", UploadFiles)
+        });
+
+        function UploadFiles(event) {
+            let fileObj = $("#upload_font_files");
+            let filelist = fileObj[0].files;
+            console.log(filelist[0]);
+        }
     </script>
 </body>
 
