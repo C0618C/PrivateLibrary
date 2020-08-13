@@ -74,10 +74,11 @@
     <p class="card-text">春如旧。人空瘦。泪痕红浥鲛绡透。</p>
     <p class="card-text">桃花落。闲池阁。山盟虽在，锦书难托。</p>
     <p class="card-text">莫莫莫。</p>
-    <a href="#" class="btn btn-danger">删除</a>
+    <button class="btn btn-danger delete_font" >删除</button>
   </div>
 </div>`);
                     });
+                    fontSel.on("click", ".delete_font", DeleteFont);
                 }
             });
 
@@ -89,13 +90,18 @@
                 $(`label[for="${e.target.id}"]`).text(fileName.join(","))
             });
 
-            $("#upload_file").on("click", UploadFiles)
+            $("#upload_file").on("click", UploadFiles);
         });
 
         function UploadFiles(event) {
             let fileObj = $("#upload_font_files");
             let filelist = fileObj[0].files;
             console.log(filelist[0]);
+            console.log("todo:执行上传字体")
+        }
+
+        function DeleteFont(event) {
+            console.log("todo:执行删除字体")
         }
     </script>
 </body>

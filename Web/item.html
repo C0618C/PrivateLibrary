@@ -110,8 +110,8 @@
                 <div class="form-check align-middle center" style="margin-top: 10px;">
                     <label style="margin-right: 15px;" class="center">
                       序号区间
-                      <input type="number" style="width: 60px" class="pick_range_num">-
-                      <input type="number" style="width: 60px" class="pick_range_num">
+                      <input type="number" style="width: 60px" class="pick_range_num" min="1"/>-
+                      <input type="number" style="width: 60px" class="pick_range_num" min="1"/>
                       <button type="button" class="btn btn-sm btn-primary" id="bt_pick_range">确定</button>
                     </label>
                     <input type="radio" name="click_action" id="ca_1" value="1" checked /><label for="ca_1"
@@ -245,9 +245,8 @@
               })
             })
             $('#bt_pick_range').click(() => {
-              const num = $('.pick_range_num').map((i, e) => $(e).val())
-                .toArray().map(t => Number(t));
-              pick($('input:checkbox').slice(num[0], num[1]))
+              const num = $('.pick_range_num').map((i, e) => Number($(e).val())).toArray();
+              pick($('input:checkbox').slice(num[0]-1, num[1]))
               $('.pick_range_num').val('');
             })
         }
