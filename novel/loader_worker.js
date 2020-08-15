@@ -16,6 +16,9 @@ try {
     // console.log(`[线程${threadId}]准备就绪！！！`);
     let runOnecTime = (setting, isNeedWait, isTryAgain) => {
         setting.isok = !isTryAgain;
+
+        if (setting.isok) console.log(`[线程${threadId}]完成任务:\t`, setting.cpStting.title)
+
         parentPort.postMessage(setting);
     }
     parentPort.on('message', msg => {

@@ -218,8 +218,6 @@ function __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTime
         file.filepath = dir + file.file;
     })
 
-    console.log(jobSetting);
-
     if (jobSetting.iscompress) {//选择了合并
         console.log("开始合并TXT文件！！")
         CombineFiles({ title: novel.title, chapters: jobSetting.chapters }, (new_file_name) => {
