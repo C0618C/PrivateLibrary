@@ -94,7 +94,7 @@ function DownloadNovel(novel) {
     let chapters = novel.chapters;              //在排队的章节队列
     let host = novel.host;
     let rule = GetRule(host);
-    novel.curIndex = JSON.parse(Cache.GetNovelIndex(novel.title));
+    let curIndex = JSON.parse(Cache.GetNovelIndex(novel.title));
 
     if (chapters.length == 0 || !host || !rule) {
         console.error("抓取书籍文本失败，相关信息不全！", chapters, host, rule);
@@ -109,6 +109,7 @@ function DownloadNovel(novel) {
 
     let jobSetting = {
         chapters: chapters.concat(),
+        curIndex: curIndex,
         iscompress: novel.iscompress,
         printPdf: novel.printPdf,
         sendmail: novel.sendmail,
@@ -149,14 +150,14 @@ function __R1_DownTheUrlAndCacheFiles(novel, chapters, jobSetting, retryTimes) {
             if (threads_exit_num !== threads_count) return;               //尚有进程未退出，继续等待
 
             jobSetting.isSuccess = jobSetting.jobDoneCount == jobSetting.dwChapterCount
-            __R2_CatchUrlFinishCallback(novel.curIndex, jobSetting, checkChapters, retryTimes);
+            __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTimes);
         });
         worker.on('message', msg => {
             if (!msg.initOk) {
                 if (msg.isok) {
                     msg.cpStting.file = msg.file;
                     checkChapters.push(msg.cpStting);
-                    GetIndexSetting(msg.cpStting, novel.curIndex).file = msg.file;
+                    GetIndexSetting(msg.cpStting, jobSetting.curIndex).file = msg.file;
                     GetIndexSetting(msg.cpStting, jobSetting).file = msg.file;
                     jobSetting.jobDoneCount++;
                 } else {
@@ -174,7 +175,7 @@ function __R1_DownTheUrlAndCacheFiles(novel, chapters, jobSetting, retryTimes) {
             let cpStting = chapters.shift();
             worker.postMessage({
                 cpStting: cpStting,
-                savedCpSetting: GetIndexSetting(cpStting, novel.curIndex),
+                savedCpSetting: GetIndexSetting(cpStting, jobSetting.curIndex),
                 isFinish: isFinish,
                 NewCpID: Solution.NewCpID,
                 novel: baseNovel
@@ -207,7 +208,7 @@ function __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTime
         return;
     }
 
-    Cache.CacheIndex(novel);       //保存最新章节信息
+    Cache.CacheIndex(jobSetting.curIndex);       //保存最新章节信息
 
     let compressed = false;         //已合并TXT
     let pdfprinted = false;         //已合并PDF
