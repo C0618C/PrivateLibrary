@@ -201,6 +201,9 @@ function __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTime
     let failFiles = [];
     let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters }, failFiles);
     if (!isCheckOK) {               //文件校验失败——文件缺失        重回第一环
+        failFiles.forEach(file => {
+            file.reload = true;
+        });
         console.log("部分文件校验不通过，重新返回R1下载", failFiles);
         jobSetting.dwChapterCount = checkChapters.length;
         jobSetting.jobDoneCount = checkChapters.length - failFiles.length;
