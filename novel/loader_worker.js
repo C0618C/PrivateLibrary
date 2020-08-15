@@ -78,7 +78,7 @@ function LoadAndCacheTheWeb(setting, callback) {
         Cache.SaveChapter(cachePath, content);
 
         callback?.(setting, true);
-    });
+    }, !setting.cpStting.reload);
 }
 
 
