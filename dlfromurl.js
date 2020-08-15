@@ -46,3 +46,4 @@ function GetTempPathByUrl(url) {
 
 
 exports.GetTextByURL = GetTextByURL;
+exports.GetTempPathByUrl = GetTempPathByUrl;

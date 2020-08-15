@@ -9,7 +9,7 @@ const {
 
 const { Cache } = require("./cache");
 const PDFCreater = require("./pdf");
-const { GetTextByURL } = require("../dlfromurl");
+const { GetTextByURL, GetTempPathByUrl } = require("../dlfromurl");
 const { ChangeRule, GetRule, GetHost } = require("./loader_rule");
 const { QS_GetValueBySetting } = require("./analyzer")
 
