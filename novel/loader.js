@@ -1,41 +1,22 @@
 const fs = require('fs');             //
-const got = require('got');             //请求远程类容
-const Iconv = require('iconv-lite');    //转码相关
 const cheerio = require('cheerio');     //通过类似jquery的形式解释html源码
 
 const { pipeline } = require('stream');
+const {
+    isMainThread, parentPort, workerData, threadId,
+    MessageChannel, MessagePort, Worker
+} = require('worker_threads');
 
-const Cache = require("./cache").Cache;
+const { Cache } = require("./cache");
 const PDFCreater = require("./pdf");
-
+const { GetTextByURL } = require("../dlfromurl");
+const { ChangeRule, GetRule, GetHost } = require("./loader_rule");
+const { QS_GetValueBySetting } = require("./analyzer")
 
 let Solution;
 let Servers;
 
-let Rules = Cache.GetRuleFromFile();
-if (Rules.length == 0) Rules = {};
-else {
-    try {
-        Rules = JSON.parse(Rules);
-    } catch (e) {
-        Rules = {};
-    }
-}
-function ChangeRule(new_rule) {
-    Rules = Object.assign({}, new_rule);
-}
-
-function GetRule(url) {
-    let host = GetHost(url);
-    if (!Rules[host]) {
-        console.warn("请配置网站的采集规则：", host);
-        return;
-    }
-    let rule = Rules[host];
-    if (!rule.encoding) rule.encoding = "utf-8";
-    return rule;
-}
-
+const threads_num = 10;     //同时开多少线程在爬
 
 
 function Init(solution, ss) {
@@ -107,151 +88,191 @@ function LoadNovelIndex(url, callback, useCache = true) {
 
 //下载指定小说文章
 function DownloadNovel(novel) {
-    let index = Cache.GetNovelIndex(novel.title);
-    let dir = Cache.GetNovelCachePath(novel.title) + "/";
+    // let dir = Cache.GetNovelCachePath(novel.title) + "/";
     console.log("开始爬：", novel);
-    //小说的索引、目录
-    let curIndex = JSON.parse(index);
-    let chapters = novel.chapters;
-    const dwChapterCount = chapters.length;     //总共需要下载的章节数
-    let jobDoneCount = 0;                       //已经下载数量
+
+    let chapters = novel.chapters;              //在排队的章节队列
     let host = novel.host;
     let rule = GetRule(host);
-    let checkChapters = [];                     //记录本次任务的文件，然后检查进度
+    novel.curIndex = JSON.parse(Cache.GetNovelIndex(novel.title));
 
     if (chapters.length == 0 || !host || !rule) {
         console.error("抓取书籍文本失败，相关信息不全！", chapters, host, rule);
         return;
     }
 
-    if(novel.printPdf && !PDFCreater.CheckSetting()){
+    if (novel.printPdf && !PDFCreater.CheckSetting()) {
         console.error("启用了生成PDF，但没设定具体字体，这将会导致乱码（PDF默认字体没有支持中文的）请到设置 -> PDF设置指定使用字体。");
         console.log("所有进程已停止");
         return;
     }
 
-    /**
-     * 单篇文章下载器
-     * @param {*} chapterSetting 
-     * @param {function(isNeedWait,isTryAgain)} callback 进入下一轮的定时器
-     */
-    let _loadAChapter = (chapterSetting, callback) => {
-        //console.log("给我爬", chapterSetting)
+    let jobSetting = {
+        chapters: chapters.concat(),
+        iscompress: novel.iscompress,
+        printPdf: novel.printPdf,
+        sendmail: novel.sendmail,
+        dwChapterCount: chapters.length,
+        jobDoneCount: 0
+    }
+    __R1_DownTheUrlAndCacheFiles(novel, chapters, jobSetting, 0);
+}
 
-        let curChapterSetting = GetIndexSetting(chapterSetting, curIndex);
 
-        //缓存的章节目录没更新的情况下，远程服务器更新了页面的地址导致
-        if (curChapterSetting == null) {
-            curChapterSetting = chapterSetting;
-            curIndex.chapters.push(curChapterSetting);
-            console.warn("按道理不应该运行到这儿，请检查章节信息。必要时请更新书籍目录。")
-        }
-        checkChapters.push(curChapterSetting);
+/**
+ * 【第一环】开始多线程爬文章
+ * @param {*} chapters 这次批次要下载的章节数量
+ * @param {*} jobSetting 当前任务设置
+ * @param {*} retryTimes 重试次数
+ */
+function __R1_DownTheUrlAndCacheFiles(novel, chapters, jobSetting, retryTimes) {
+    let checkChapters = [];                     //记录本次任务的文件，然后检查进度
+    console.log("R1开始啦！！！！！！！！！！！！！！");
+    let threads_exit_num = 0;
+    retryTimes++;
+    if (retryTimes == 10) {
+        console.error("已达到最大重试上限，依然失败，已放弃任务，请检查网站是否能正确打开。这些下不来：", chapters);
+        return;
+    }
 
-        //查到缓存记录，跳过
-        if (curChapterSetting.file && Cache.CheckFile(dir + curChapterSetting.file) && chapterSetting.reload !== true) {
-            //console.log("当前文件已缓存", curChapterSetting);
-            jobDoneCount++;
-            if (callback) callback(false);
-            return;
-        }
+    let baseNovel = { host: novel.host, title: novel.title }
 
-        //解释小说，提取正文
-        GetTextByURL(/^https?/.test(curChapterSetting.url) ? curChapterSetting.url : host + curChapterSetting.url, rule.encoding, (text, err) => {
-            if (err || text == null) {
-                let msg = { done: jobDoneCount, count: dwChapterCount, url: curChapterSetting.url, isok: false };
-                Servers.socketServer.emit("Novel/Downloading", novel.id, msg);           //通知出错了
-                callback(true, true);//出错了 就等等再重启下载
-                return;
+    //多开线程，ε=ε=ε=(~￣▽￣)~    // R1 开始
+    const threads_count = Math.min(threads_num, chapters.length)
+    for (var t = 0; t < threads_count; t++) {
+        // console.log("开线程跑啊：", t);
+        const worker = new Worker("./novel/loader_worker.js", { workerData: { isinit: true } });
+        worker.on('exit', code => {        //有进程退出时
+            threads_exit_num++;
+            console.log(`线程已退出： ${code}`);
+
+            if (threads_exit_num !== threads_count) return;               //尚有进程未退出，继续等待
+
+            jobSetting.isSuccess = jobSetting.jobDoneCount == jobSetting.dwChapterCount
+            __R2_CatchUrlFinishCallback(novel.curIndex, jobSetting, checkChapters, retryTimes);
+        });
+        worker.on('message', msg => {
+            if (!msg.initOk) {
+                if (msg.isok) {
+                    msg.cpStting.file = msg.file;
+                    checkChapters.push(msg.cpStting);
+                    GetIndexSetting(msg.cpStting, novel.curIndex).file = msg.file;
+                    GetIndexSetting(msg.cpStting, jobSetting).file = msg.file;
+                    jobSetting.jobDoneCount++;
+                } else {
+                    chapters.push(msg.cpStting);
+                }
+
+                //广播爬取进度
+                let noticeInfo = { done: jobSetting.jobDoneCount, count: jobSetting.dwChapterCount, url: msg.cpStting.url, isok: msg.isok };
+                Servers.socketServer.emit("Novel/Downloading", novel.id, noticeInfo);
             }
-            let content = ParseContentPage(text, rule.content_page);
 
-            //保存到文件
-            let fileName = Solution.NewCpID + ".txt";
-            curChapterSetting.file = fileName;
-            let cachePath = dir + fileName;
-            Cache.SaveChapter(cachePath, content);
+            let isFinish = chapters.length == 0;//这只意味着任务分完 但不一定是全部完成。。。
+            if (isFinish) return worker.postMessage({ isFinish: isFinish });
 
-            jobDoneCount++;
+            let cpStting = chapters.shift();
+            worker.postMessage({
+                cpStting: cpStting,
+                savedCpSetting: GetIndexSetting(cpStting, novel.curIndex),
+                isFinish: isFinish,
+                NewCpID: Solution.NewCpID,
+                novel: baseNovel
+            });
+        });
+    }
+}
 
-            //通知爬取进度
-            let msg = { done: jobDoneCount, count: dwChapterCount, url: curChapterSetting.url, isok: true };
-            Servers.socketServer.emit("Novel/Downloading", novel.id, msg);
 
-            //更新章节情况
-            Cache.CacheIndex(curIndex);
+/**
+ * 【第二环】在所有线程都停止下载后执行的后续处理逻辑
+ * @param {*} novel 最新的章节情况
+ * @param {*} jobSetting 当前任务状态 
+ * @param {Array} checkChapters 已完成下载的章节
+ */
+function __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTimes) {
+    if (!jobSetting.isSuccess) {
+        console.error("爬文章时出错：所有文章都爬过了，但已完成的数量不对。。。请再试一次任务吧。", novel)
+        return;
+    }
 
-            if (callback) callback(true);
+    console.log("R1已完成，开始R2任务。");
+    let failFiles = [];
+    let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters }, failFiles);
+    if (!isCheckOK) {               //文件校验失败——文件缺失        重回第一环
+        console.log("部分文件校验不通过，重新返回R1下载", failFiles);
+        jobSetting.dwChapterCount = checkChapters.length;
+        jobSetting.jobDoneCount = checkChapters.length - failFiles.length;
+        __R1_DownTheUrlAndCacheFiles(novel, failFiles, jobSetting, retryTimes++);
+        return;
+    }
+
+    Cache.CacheIndex(novel);       //保存最新章节信息
+
+    let compressed = false;         //已合并TXT
+    let pdfprinted = false;         //已合并PDF
+    let files = [];                 //已完成文件信息收集
+
+    let dir = Cache.GetNovelCachePath(novel.title) + "/";
+    jobSetting.chapters.forEach(file => {
+        file.filepath = dir + file.file;
+    })
+
+    console.log(jobSetting);
+
+    if (jobSetting.iscompress) {//选择了合并
+        console.log("开始合并TXT文件！！")
+        CombineFiles({ title: novel.title, chapters: jobSetting.chapters }, (new_file_name) => {
+            compressed = true;
+            let fileName = new_file_name.split("/")
+            files.push({ filename: fileName[fileName.length - 1], path: new_file_name });
+            __R3_FilesFinishCallback(novel, jobSetting, { compressed: compressed, pdfprinted: pdfprinted, files: files });
         });
     }
 
-    const t_sleep_time = 1000;
-    let _runner = () => {
-        let cpStting = chapters.shift();
-        if (!cpStting) return;//分派完 但不一定是已下载完
+    if (jobSetting.printPdf) {
+        console.log("开始合并PDF文件！！")
+        PDFCreater.Create(jobSetting.chapters, novel.title + "_" + new Date().getTime(), (fileInfo, err) => {  //filename: string; path: string
+            if (err) { return; }//生成PDF失败了
 
-        _loadAChapter(cpStting, (needWait, isTryAgain) => {
-            if (isTryAgain) { chapters.push(cpStting); console.warn("失败了，加入队尾重试", cpStting) }
-
-            if (jobDoneCount == dwChapterCount) {
-                let failFiles = [];
-                let isCheckOK = CheckCacheFile({ title: novel.title, chapters: checkChapters }, failFiles);
-
-                if (!isCheckOK) {       //文件校验失败——文件缺失
-                    chapters.push(...failFiles);
-                    jobDoneCount -= failFiles.length;
-                    _runner();      //重新开始
-                    return;
-                }
-
-                //TODO: 合并TXT和合并PDF应该是一种组合，即，可以是合并TXT后发txt到kindle ，也可以是合并pdf后发pdf 更可以同时发 需要处理
-
-
-                if (novel.iscompress) {//选择了合并
-                    CombineFiles({ title: novel.title, chapters: checkChapters }, (new_file_name) => {
-                        Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex, new_file_name);
-                        console.log("所有任务已完成：", novel.title);
-                    });
-                    return;
-                }
-
-                if (novel.printPdf) {
-                    console.log("开始合并PDF文件！！")
-                    PDFCreater.Create(checkChapters, novel.title + "_" + new Date().getTime(), (fileInfo, err) => {  //filename: string; path: string
-                        if (err) { return; }//生成PDF失败了
-
-                        if (!novel.sendmail) {      //不需要发文件到邮箱
-                            Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
-                            return;
-                        }
-
-                        if (novel.sendmail) {       //需要发送文件 
-                            Servers.MailServer.SendMail({
-                                title: fileInfo.filename,
-                                content: "本文件通过 PrivateLibrary 自动生成并发送。",
-                                files: [fileInfo],
-                                callback: (result, err) => {
-                                    if (result) {
-                                        Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
-                                    } else {
-                                        console.error("尝试发送邮件失败:", err);
-                                    }
-                                }
-                            });
-                            return;
-                        }
-                    });
-                    return;
-                }
-
-                Servers.socketServer.emit("Novel/Download/Finish", novel.id, curIndex);
-            }
-            let sleep_time = jobDoneCount % 5 == 0 ? t_sleep_time * 3 : t_sleep_time;//增加弹性等待时间 防止爬太快出错
-            setTimeout(_runner, needWait ? sleep_time : 0);
+            pdfprinted = true;
+            files.push(fileInfo);
+            __R3_FilesFinishCallback(novel, jobSetting, { compressed: compressed, pdfprinted: pdfprinted, files: files });
         });
     }
 
-    _runner();
+    __R3_FilesFinishCallback(novel, jobSetting, { compressed: compressed, pdfprinted: pdfprinted, files: files });
+}
+
+/**
+ * 【第三环】所有文件处理完毕后的回调
+ * @param {*} novel 
+ * @param {object} jobSetting 整个任务的所有设置状态
+ * @param {*} status 当前状态
+ */
+function __R3_FilesFinishCallback(novel, jobSetting, status) {
+    if (jobSetting.iscompress && !status.compressed) return;
+    if (jobSetting.printPdf && !status.pdfprinted) return;
+
+    console.log("R2已完成，开始R3。", jobSetting.iscompress, jobSetting.printPdf, status);
+    if (jobSetting.sendmail) {       //需要发送文件 
+        Servers.MailServer.SendMail({
+            title: novel.title,
+            content: "本文件通过 PrivateLibrary 自动生成并发送。" + JSON.stringify(status.files),
+            files: status.files,
+            callback: (result, err) => {
+                if (result) {
+                    Servers.socketServer.emit("Novel/Download/Finish", novel.id, novel);
+                } else {
+                    console.error("尝试发送邮件失败:", err);
+                }
+            }
+        });
+        return;
+    } else {
+        Servers.socketServer.emit("Novel/Download/Finish", novel.id, novel);
+        console.log("R3已完成，所有步骤已完成，退出。");
+    }
 }
 
 /**
@@ -292,7 +313,11 @@ function DownLoadOneChapter(novelid, url, isUseCace, cacheFile, host) {
     DownloadNovel(novel);
 }
 
-
+/**
+ * 检查下载的文件是否成功
+ * @param {*} novel 已下载的章节信息
+ * @param {*} fall_files 校验失败的文件列表
+ */
 function CheckCacheFile(novel, fall_files = []) {
     let dir = Cache.GetNovelCachePath(novel.title) + "/";
     const count = novel.chapters.length;
@@ -364,78 +389,6 @@ function GetIndexSetting(chapterSetting, curIndex) {
     return curChapterSetting;
 }
 
-
-/**
- * 返回纯粹的域名如 www.abc.com
- * @param {任意URL网址} url 
- */
-function GetHost(url) {
-    url = url.replace(/https?:\/\//, "");
-    return url.indexOf("/") == -1 ? url : url.substr(0, url.indexOf("/"));
-}
-
-
-/**
- * 爬指定的地址
- * @param {string} url 
- * @param {string} encoding 
- * @param {function} callback 成功爬完目标地址后的回调处理函数
- */
-function _GetTextByURL(url, encoding, callback) {
-    console.log("正在爬地址：", url);
-    try {
-        got.stream(url, { timeout: 10000 }).pipe(Iconv.decodeStream(encoding)).collect(function (err, body) {
-            console.log("爬地址完成：", url);
-            callback(body);
-        });
-    } catch (err) {
-        console.error(`抓取网页失败${url}   `, err);
-        callback?.(null);
-    }
-}
-
-/**
- * 
- * @param {*} url 
- * @param {*} encoding 
- * @param {function(text,err)} callback_text_err 下载完后的回调函数，返回下载成的文本或null和错误信息 
- * @param {*} isUseCace 
- */
-function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
-    //console.log("正在爬地址：", url);
-    let tempFilePath = GetTempPathByUrl(url);
-    if (Cache.CheckFile(tempFilePath)) {
-        if (isUseCace) {
-            console.warn("使用了临时文件：", url, tempFilePath);
-            callback_text_err(fs.readFileSync(tempFilePath).toString());
-            return;
-        }
-    }
-
-    pipeline(
-        got.stream(url, { timeout: 10000 }),
-        Iconv.decodeStream(encoding),
-        fs.createWriteStream(tempFilePath),                     //NOTE: 这个临时文件显得有点多余
-        (err) => {
-            if (err) {                  //进这儿的一般是超时出错
-                console.error(url, tempFilePath, err.message);
-                callback_text_err(null, err);
-                return;
-            }
-            callback_text_err(fs.readFileSync(tempFilePath).toString());
-            //console.log("爬完", url, tempFilePath);
-        }
-    );
-}
-
-function GetTempPathByUrl(url) {
-    let host = GetHost(url);
-    return Cache.TEMP_FILE_PATH + "/" + url.substr(url.indexOf(host) + host.length).replace(/[\/\\\.\?\#]/g, "");
-}
-
-
-
-
 /**
  * 解释某目录，收集书籍的章节信息
  * @param {string} text 网页源码
@@ -480,37 +433,7 @@ function ParseIndexPage(text, rule, path) {
 }
 
 
-function ParseContentPage(text, rule) {
-    let content;
-    try {
-        if (rule.type == "querySelector" || rule.type == undefined) {
-            $ = cheerio.load(text);
-            let title = QS_GetValueBySetting($(rule.title.selector), rule.title.text);
-            content = QS_GetValueBySetting($(rule.content.selector), rule.content.text);
 
-            content = title + "\n" + content + "\n\n";
-        }
-    } catch (err) {
-        console.error("分析文章有内容时出错：", err);
-        console.warn("出错的文章正文", text);
-    }
-
-    return content;
-}
-
-
-/**
- * 依赖于JQ的规则解释器
- * @param {qsObject} item 
- * @param {rule} setting 
- */
-function QS_GetValueBySetting(item, setting) {
-    //item = $(item);
-    if (!setting.includes("/")) return item.attr(setting);
-    if (setting.startsWith("fn/")) return item[setting.replace("fn/", "")]();
-
-    return;
-}
 
 console.log("loader.js")
 exports.Load = Init;
