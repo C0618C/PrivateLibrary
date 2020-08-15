@@ -338,7 +338,7 @@ function CombineFiles(novel, callback) {
                 Servers.socketServer.emit("Novel/CombineFiles", novel.id, { done: done, count: count });
 
                 if (done == count) {
-                    if (callback) callback(new_file_path);
+                    callback?.(new_file_path);
                     return;
                 }
                 _combiner();
@@ -390,7 +390,7 @@ function _GetTextByURL(url, encoding, callback) {
         });
     } catch (err) {
         console.error(`抓取网页失败${url}   `, err);
-        if (callback) callback(null);
+        callback?.(null);
     }
 }
 

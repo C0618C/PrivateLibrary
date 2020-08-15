@@ -47,10 +47,10 @@ function SendAMail({ callback, title, content, files, mailto, sender, pass }) {
         CreateTransport(sender, pass).sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log("【SMTP】发送邮件失败：", error);
-                if (callback) callback(false, error);
+                callback?.(false, error);
             } else {
                 console.log("【SMTP】邮件发送完成。");
-                if (callback) callback(true);
+                callback?.(true);
             }
         });
     }

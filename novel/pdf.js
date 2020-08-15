@@ -17,7 +17,7 @@ function CreatePDF(target, newFileName, callback) {
 
         newDoc.stream.on('finish', function () {
             console.log("【PDF】PDF文件输出已完成！", fileInfo)
-            if (callback) callback(fileInfo)
+            callback?.(fileInfo)
         });
     } catch (e) {
         console.log(e);
@@ -40,7 +40,7 @@ function CreatePDFWithSetting(setting, text, filePath, callback) {
         const newDoc = CreateNewDoc(filePath, setting);
         newDoc.doc.text(text, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).end();
         newDoc.stream.on('finish', function () {
-            if (callback) callback({ filename: "预览文件", path: filePath });
+            callback?.({ filename: "预览文件", path: filePath });
             console.log("PDF预览文件生成成功", filePath);
         });
     } catch (e) {

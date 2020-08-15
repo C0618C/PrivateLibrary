@@ -10,7 +10,7 @@ function ReloadIndex(id, isUseCache, callback) {
         url: "/api/novel/index", dataType: "json",
         data: { id: id, isUseCache: isUseCache }, method: "POST",
         success: (result) => {
-            if (callback) callback(result);
+            callback?.(result);
         }
     });
 }
@@ -27,7 +27,7 @@ function DeleteNovel(id, isDelFile, callback) {
         success: (result) => {
             if (!result || result.length == 0) return;
             let isSuccess = result == "ok";
-            if (callback) callback(isSuccess);
+            callback?.(isSuccess);
         }
     });
 }
@@ -37,7 +37,7 @@ function GetRuleSetting(callback) {
     $.ajax({
         url: "/api/setting/rule", method: "GET", dataType: "json",
         success: (result) => {
-            if (callback) callback(result);
+            callback?.(result);
         }
     });
 }
@@ -46,7 +46,7 @@ function UpdateRuleSetting(setting, callback) {
     $.ajax({
         url: "/api/setting/rule", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify(setting),
         success: (result) => {
-            if (callback) callback(result);
+            callback?.(result);
         }
     });
 }
@@ -59,7 +59,7 @@ function SendEMail({ title, content, sender, mailto, files, callback, pass }) {
     $.ajax({
         url: "/api/email/send", method: "POST", dataType: "json", contentType: 'application/json', data: JSON.stringify({ title, content, sender, mailto, files, pass }),
         success: (result) => {
-            if (callback) callback(result);
+            callback?.(result);
         }
     });
 }
@@ -124,7 +124,7 @@ function ShowModalDialog({ title, body, buttons, callback, initfn }) {
     $("body").append(dialog);
     dialog.modal();
     dialog.on("hidden.bs.modal", () => {
-        if (callback) callback(dialog);
+        callback?.(dialog);
         dialog.remove();
     });
     /*
