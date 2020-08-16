@@ -32,7 +32,10 @@ function DeleteNovel(id, isDelFile, callback) {
     });
 }
 
-
+/**
+ * 取得记录的提取规则配置
+ * @param {*} callback 
+ */
 function GetRuleSetting(callback) {
     $.ajax({
         url: "/api/setting/rule", method: "GET", dataType: "json",
