@@ -98,10 +98,22 @@
             let filelist = fileObj[0].files;
 
             const formData = new FormData();
-            filelist.forEach((item, flag) => {
-                formData.append(`file`, item.file, item.file.name);
+            for (let item of filelist) {
+                formData.append(`file`, item, item.name);
+            };
+            $.ajax({
+                url: "/api/fs/upload",
+                type: "post",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    console.log(data)
+                },
+                error: function (e) {
+                    console.error(e)
+                }
             });
-
 
             /*
               //upload
