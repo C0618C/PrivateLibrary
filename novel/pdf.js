@@ -1,5 +1,6 @@
 const PDFDocument = require('pdfkit');
 const pdfSetting = require("./setting").pdf;
+const { makeContentSplitLines } = require('./helper')
 const fs = require('fs');
 
 function CreatePDF(target, newFileName, callback) {
@@ -74,7 +75,7 @@ function MakeFilesToADoc(files, doc) {
     files.forEach(file => {
         let context = fs.readFileSync(file.filepath).toString();
         // 多于两空格的话视为换行
-        context = context.replace(/\s{2,}/mg, '\n\r');
+        context = makeContentSplitLines(context);
         doc.text(context, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).addPage();
     });
     doc.end();

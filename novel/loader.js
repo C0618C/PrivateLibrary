@@ -9,6 +9,7 @@ const {
 
 const { Cache } = require("./cache");
 const PDFCreater = require("./pdf");
+const { makeContentSplitLines } = require("./helper");
 const { GetTextByURL, GetTempPathByUrl } = require("../dlfromurl");
 const { ChangeRule, GetRule, GetHost } = require("./loader_rule");
 const { QS_GetValueBySetting } = require("./analyzer")
@@ -373,8 +374,8 @@ function CombineFiles(novel, callback) {
             async function* (source) {
                 source.setEncoding('utf8');  // Work with strings rather than `Buffer`s.
                 for await (const chunk of source) {
-                  // 多于两空格的话视为换
-                  yield chunk.replace(/\s{2,}/mg, '\n\r')
+                    // 多于两空格的话视为换
+                    yield makeContentSplitLines(chunk)
                 }
             },
             fs.createWriteStream(new_file_path, { flags: "a" }), (err) => {
