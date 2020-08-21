@@ -21,6 +21,9 @@
     "url": "https://github.com/C0618C/PrivateLibrary/issues"
   },
   "homepage": "https://github.com/C0618C/PrivateLibrary#readme",
+  "engines": {
+     "node": ">=14" 
+  },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "express": "^4.17.1",
