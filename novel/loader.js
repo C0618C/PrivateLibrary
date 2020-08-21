@@ -369,7 +369,15 @@ function CombineFiles(novel, callback) {
     let _combiner = () => {
         let curChapter = chapters.shift();
         pipeline(
-            fs.createReadStream(dir + curChapter.file), fs.createWriteStream(new_file_path, { flags: "a" }), (err) => {
+            fs.createReadStream(dir + curChapter.file),
+            async function* (source) {
+                source.setEncoding('utf8');  // Work with strings rather than `Buffer`s.
+                for await (const chunk of source) {
+                  // 多于两空格的话视为换
+                  yield chunk.replace(/\s{2,}/mg, '\n\r')
+                }
+            },
+            fs.createWriteStream(new_file_path, { flags: "a" }), (err) => {
                 if (err) {
                     console.error("合并文件时出错:", err.message, curChapter);
                     Servers.socketServer.emit("Novel/CombineFiles", novel.id, { done: done, count: count }, curChapter.url);

@@ -73,6 +73,8 @@ function MakeFilesToADoc(files, doc) {
     setting = pdfSetting.get();
     files.forEach(file => {
         let context = fs.readFileSync(file.filepath).toString();
+        // 多于两空格的话视为换行
+        context = context.replace(/\s{2,}/mg, '\n\r');
         doc.text(context, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).addPage();
     });
     doc.end();
