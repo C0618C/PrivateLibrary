@@ -1,7 +1,7 @@
 const fs = require('fs');             //
 
 const NOVEL_DOWNLOAD_PATH = process.cwd() + "/download";
-const TEMP_FILE_PATH = NOVEL_DOWNLOAD_PATH+"/temp";
+const TEMP_FILE_PATH = NOVEL_DOWNLOAD_PATH + "/temp";
 const SOLUTION_DIR_PATH = process.cwd() + "/.sln";
 const RULE_FILE_PATH = SOLUTION_DIR_PATH + "/rule.json";
 const SOLUTION_FILE_PATH = SOLUTION_DIR_PATH + "/index.json";
@@ -21,7 +21,7 @@ class Cache {
     static CacheIndex(novel) {
         fs.mkdirSync(this.GetNovelCachePath(novel.title), { recursive: true });
 
-        novel.time = new Date().getTime();
+        if (!novel.time) novel.time = new Date().getTime();
         fs.writeFileSync(this.GetNovelCacheSetting(novel.title), JSON.stringify(novel));
     }
     static SaveIndexStatus(novel) {
@@ -43,7 +43,7 @@ class Cache {
         let setting = this.GetNovelCacheSetting(novel_name);
         try {
             return fs.readFileSync(setting).toString();
-        } catch(e) {
+        } catch (e) {
             console.error(`未找到 ${setting} 文件，请检查 title 规则是否正确`);
             console.error(e);
         }

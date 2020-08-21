@@ -6,7 +6,7 @@ let DirToMake = [
     process.cwd() + "/book",                    //输出的PDF目录
     Cache.FONT_DIR_PATH,                        //打印PDF时可选的字体存放目录
     Cache.NOVEL_DOWNLOAD_PATH,                  //小说下载的目录
-    process.cwd() + "/download/temp"            //网页缓存的目录——可以清空清理
+    Cache.TEMP_FILE_PATH                        //网页缓存的目录——可以清空清理
 ]
 DirToMake.forEach(dir => {
     if (!fs.existsSync(dir)) {

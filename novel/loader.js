@@ -28,10 +28,10 @@ function Init(solution, ss) {
 }
 
 /**
- * 下载小说的目录
+ * 获取小说的目录
  * @param {*} url 
  * @param {function (id,novel,err)} callback 完成后的回调函数
- * @param {*} useCache 
+ * @param {*} useCache 是否重新下载
  */
 function LoadNovelIndex(url, callback, useCache = true) {
     //先尝试在工程里找
@@ -57,20 +57,33 @@ function LoadNovelIndex(url, callback, useCache = true) {
 
             //结果缓存进工程
             let n = ParseIndexPage(text, rule.index_page, path);
-            let id = Solution.AddNewItem(url, n.title, n.chapters.length, true);
-
-            n.id = id;
-            n.url = url;
-            n.host = host;
+            let isStop = false;             //是否停更
+            let hasUpdate = true;          //是否有更新
 
             //跟原来缓存进度合并
             if (Cache.CheckFile(Cache.GetNovelCacheSetting(n.title))) {//先检查原来项目是否存在
                 let oldIndex = JSON.parse(Cache.GetNovelIndex(n.title));
                 n.chapters.forEach(cp => {
                     let oldChapter = GetIndexSetting(cp, oldIndex);
-                    if (oldChapter) cp.file = oldChapter.file;
+                    if (oldChapter) Object.assign(cp, oldChapter);
                 });
+                if (oldIndex.chapters.length == n.chapters.length) {
+                    hasUpdate = false;
+                    let curTime = new Date().getTime();
+                    if (curTime - oldIndex.time > 432000000) {//5天，超过5天判断为停更
+                        n.time = oldIndex.time;
+                        n.isStop = isStop = true;
+                    }
+                }
             }
+
+            //更新书籍信息
+            let id = Solution.AddNewItem({ url, title: n.title, count: n.chapters.length, isStop, hasUpdate }, true);
+
+            //更新书籍详细目录信息
+            n.id = id;
+            n.url = url;
+            n.host = host;
 
             //缓存章节列表
             Cache.CacheIndex(n);
@@ -181,6 +194,7 @@ function __R1_DownTheUrlAndCacheFiles(novel, chapters, jobSetting, retryTimes) {
                 novel: baseNovel
             });
         });
+        worker.on("messageerror", err => { console.error(`线程出错:`, err); });
     }
 }
 

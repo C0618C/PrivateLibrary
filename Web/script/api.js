@@ -1,5 +1,5 @@
 /**
- * 重新加载制定书的目录
+ * 重新加载指定书的目录
  * @param {string} id 书籍ID 
  * @param {boolen} isUseCache 是否使用从缓存中加载
  * @param {function} callback 加载完目录后的回调

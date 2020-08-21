@@ -42,7 +42,7 @@ class Solution {
             console.error("更新书库库存时出错", e)
         }
     }
-    AddNewItem(url, title, count, isSaveNow = false) {
+    AddNewItem({ url, title, count, isStop, hasUpdate }, isSaveNow = false) {
         let nv = this.GetItemByUrl(url);
         if (nv == undefined) {
             nv = {
@@ -50,10 +50,12 @@ class Solution {
             };
             this.data.add(nv);
         }
-        nv.url = url
-        nv.title = title
-        nv.count = count
-        nv.time = (new Date()).getTime()
+        nv.url = url;
+        nv.title = title;
+        nv.count = count;
+
+        if (isStop) nv.isStop = true;
+        else if (hasUpdate) nv.time = (new Date()).getTime();
 
         if (isSaveNow) this.SaveSetting();
         return nv.id;

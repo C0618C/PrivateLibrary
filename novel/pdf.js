@@ -42,6 +42,8 @@ function CreatePDFWithSetting(setting, text, filePath, callback) {
         newDoc.stream.on('finish', function () {
             callback?.({ filename: "预览文件", path: filePath });
             console.log("PDF预览文件生成成功", filePath);
+
+            setTimeout(() => { fs.unlinkSync(filePath); }, 15000);            //延时清理预览文件
         });
     } catch (e) {
         console.log(e)

@@ -34,7 +34,7 @@ function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
                 return;
             }
             callback_text_err(fs.readFileSync(tempFilePath).toString());
-            //console.log("爬完", url, tempFilePath);
+            fs.unlinkSync(tempFilePath);        //临时文件用完删掉
         }
     );
 }

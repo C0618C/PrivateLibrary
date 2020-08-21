@@ -78,7 +78,7 @@ exports.Init = function (servers, NovelLibrary) {
 
 
     {    /** 单本书籍的API **/
-        //读取某个小说目录
+        //读取某个小说目录——重新抓取目录
         web.post("/api/novel/index", urlencodedParser, (req, res) => {
             let cache = req.body.isUseCache == "true";
             res.send(NovelLibrary.Solution.GetNoevlIndex(req.body.id.split("#")[0], cache));

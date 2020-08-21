@@ -298,7 +298,7 @@
                 printPdf: printPdf,
                 sendmail: sendmail
             }
-            $('#bt_download').prop('disabled', true);
+            // $('#bt_download').prop('disabled', true);            //方便测试
 
             console.log("请求下载", param)
             socket.emit("Novel/Download", param);

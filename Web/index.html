@@ -22,21 +22,21 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <a class="navbar-brand" href="#"><img src="/img/book.svg" width="30" height="30" alt="" loading="lazy"> 私人书库</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item active">
-              <a class="nav-link" href="/">首页 <span class="sr-only">(current)</span> </a>
-            </li>
-            <li class="nav-item ">
-              <a class="nav-link" href="/setting">设置</a>
-            </li>
-    
-          </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">首页 <span class="sr-only">(current)</span> </a>
+                </li>
+                <li class="nav-item ">
+                    <a class="nav-link" href="/setting">设置</a>
+                </li>
+
+            </ul>
         </div>
-      </nav>
+    </nav>
 
     <div class="container-fluid">
         <div class="row" style="margin-top: 90px;">
@@ -134,10 +134,10 @@
                     let itemCard = "";
                     for (let item of result) {
                         itemCard += `
-            <div class="card shadow-sm" style="width: 18rem;margin:2px 5px;">
+            <div class="card shadow-sm ${item.isStop ? "border-danger " : ""}" style="width: 18rem;margin:2px 5px;">
                 <div class="card-body">
                   <h5 class="card-title">${item.title}</h5>
-                  <h6 class="card-subtitle mb-2 text-muted">最近后更新：${new Date(item.time).toLocaleDateString()}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted">最后更新：${new Date(item.time).toLocaleDateString()}</h6>
                   <p class="card-text">&nbsp;<span class="float-left">共${item.count}章</span><cite class="float-right"><a href="${item.url}" target="_blank">查看源</a></cite></p>
                   <div class="float-none">
                   <a href="/item/${item.id}" class="card-link">进入</a>
