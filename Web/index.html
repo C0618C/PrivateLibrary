@@ -134,9 +134,9 @@
                     let itemCard = "";
                     for (let item of result) {
                         itemCard += `
-            <div class="card shadow-sm ${item.isStop ? "border-danger " : ""}" style="width: 18rem;margin:2px 5px;">
+            <div class="card shadow-sm " style="width: 18rem;margin:2px 5px;">
+                <div class="card-header text-white ${item.isStop ? "bg-secondary" : "bg-primary"}"><h5 class="card-title">${item.title}</h5></div>                  
                 <div class="card-body">
-                  <h5 class="card-title">${item.title}</h5>
                   <h6 class="card-subtitle mb-2 text-muted">最后更新：${new Date(item.time).toLocaleDateString()}</h6>
                   <p class="card-text">&nbsp;<span class="float-left">共${item.count}章</span><cite class="float-right"><a href="${item.url}" target="_blank">查看源</a></cite></p>
                   <div class="float-none">
