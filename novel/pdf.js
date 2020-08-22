@@ -76,6 +76,7 @@ function MakeFilesToADoc(files, doc) {
         let context = fs.readFileSync(file.filepath).toString();
         // 多于两空格的话视为换行
         context = makeContentSplitLines(context);
+        doc.outline.addItem(file.title)
         doc.text(context, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).addPage();
     });
     doc.end();
