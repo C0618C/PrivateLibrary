@@ -89,7 +89,11 @@ exports.Init = function (servers, NovelLibrary) {
             NovelLibrary.Loader.DownLoadOneChapter(req.body.id, req.body.url, cache, req.body.file, req.body.host);
             res.send("started");
         });
-
+        //将某章设置为隐藏
+        web.post("/api/novel/ignorechapter", urlencodedParser, (req, res) => {
+            NovelLibrary.Solution.SetIgnore(req.body.id, req.body.url);
+            res.send(JSON.stringify({ status: "success" }));
+        });
     }
 
     {
@@ -110,13 +114,13 @@ exports.Init = function (servers, NovelLibrary) {
 
             res.send("ok");
         });
-        web.post("/api/fs/upload", bodyParser.raw({limit:"10mb"}), (req, res) => {
+        web.post("/api/fs/upload", bodyParser.raw({ limit: "10mb" }), (req, res) => {
             // let curPath = req.body.curPath;
             // servers.fileServer.GetDirStatus(curPath).then((status) => {
             //     res.send(JSON.stringify(status));
             // });
 
-            console.log("准备上传文件",req);
+            console.log("准备上传文件", req);
 
             /*
             https://blog.csdn.net/hbiao68/article/details/105031789/

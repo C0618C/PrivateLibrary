@@ -85,6 +85,11 @@ class Solution {
         return "none";
     }
 
+    /**
+     * 获取某个书籍的目录信息
+     * @param {*} id 书籍ID
+     * @param {*} isUseCache 是否从缓存/记录里获取（否将重新抓取目录信息)
+     */
     GetNoevlIndex(id, isUseCache) {
         let novel = this.GetItemByID(id);
         if (novel == undefined) return null;
@@ -142,6 +147,21 @@ class Solution {
                 Cache.SaveIndexStatus(book);
             }
         })
+    }
+
+    /**
+     * 设置某章隐藏
+     * @param {*} bookid 书籍ID
+     * @param {*} url 章节的地址
+     */
+    SetIgnore(bookid, url) {
+        let book = this.GetNoevlIndex(bookid, true);
+        book.chapters.forEach(c => {
+            if (c.url == url) {
+                c.ignore = true;
+                Cache.SaveIndexStatus(book);
+            }
+        });
     }
 }
 

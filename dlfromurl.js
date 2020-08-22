@@ -24,7 +24,9 @@ function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
     }
 
     pipeline(
-        got.stream(url, { timeout: 10000 }),
+        got.stream(url, {
+            timeout: 10000, https: { rejectUnauthorized: false }//rejectUnauthorized 不进行Https的证书校验。
+        }),
         Iconv.decodeStream(encoding),
         fs.createWriteStream(tempFilePath),                     //NOTE: 这个临时文件显得有点多余
         (err) => {
