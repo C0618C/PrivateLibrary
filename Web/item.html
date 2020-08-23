@@ -198,6 +198,7 @@
             $("#novel_index").on("click", ".reaload_this_cp", ReloadThisChapter);
             $("#novel_index").on("click", ".hide_this_cp", IgnoreThisChapter);
 
+            $("#AutoFix").on("click", (e) => SetProofread($("#id").val()));
         });
 
         function InitNovel(novel_setting) {

@@ -67,6 +67,19 @@ function SendEMail({ title, content, sender, mailto, files, callback, pass }) {
     });
 }
 
+function SetProofread(id) {
+    let dialog = ShowModalDialog({
+        title: "设置规则",
+        size: "modal-xl",
+        body: `<div class="embed-responsive" style="height:500px;"><iframe class="embed-responsive-item" src="/page/autoproofread?${id}"></iframe></div>`,
+        initfn: (dialog) => {
+            let btBar = dialog.find(".modal-footer");
+            btBar.append(
+                $(`<button type="button" class="btn btn-success" data-dismiss="modal" id="btn_save">确定</button>`)
+            );
+        }
+    });
+}
 
 /*** UI、通知的工共API ***/
 function NoticeMessage(message, title, { type, delayMS } = { type: "primary", delayMS: 0 }) {

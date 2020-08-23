@@ -21,7 +21,7 @@
 <body>
     <div class="container-fluid">
         <div class="row container-fluid p-0 m-0">
-            <div class="col-2 p-0 ">
+            <div class="col-xl-2 col-lg-4 p-0 ">
                 <div class="card">
                     <div class="card-header">
                         规则库 <a href="#add" class="float-right  text-truncate" id="add_rule"><img
@@ -53,6 +53,16 @@
                         </blockquote>
                     </div>
                 </div>
+                <div class="card invisible" id="cur_rule_plant">
+                    <div class="card-header">
+                        本书规则
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0" id="cur_rule">
+
+                        </blockquote>
+                    </div>
+                </div>
 
             </div>
 
@@ -61,10 +71,13 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
+        let bookid = location.search.replace("?", "");
         $(() => {
             Init();
             $("#add_rule").on("click", () => { AddOrEditRule(null); });
             $("#common_rule").on("click", ".delete_common_rule", DeleteCommonRule);
+
+            InitCurRule();
         });
         function AddOrEditRule(item) {
             let dialog = ShowModalDialog({
@@ -101,6 +114,9 @@
                         $(`<button type="button" class="btn btn-primary" id="btn_delete">设为全局规则</button>`).on("click", (e) => {
                             SetToCommon($(e.target).closest(".modal-content").find("#setting_form"), dialog, item ? false : true);
                         }),
+                        bookid.length > 0 ? $(`<button type="button" class="btn btn-primary" id="btn_delete">设为本书规则</button>`).on("click", (e) => {
+                            SetForCurBook($(e.target).closest(".modal-content").find("#setting_form"), dialog, item ? false : true);
+                        }) : "",
                         $(`<button type="button" class="btn btn-danger" id="btn_delete">删除</button>`).on("click", (e) => {
                             DeleteTheRule($(e.target).closest(".modal-content").find("#setting_form"), dialog, true);
                         }),
@@ -231,6 +247,27 @@
                     UpdateCommonDom(result);
                 }
             });
+        }
+
+        function InitCurRule() {
+            let bookid = location.search.replace("?", "");
+            if (bookid == "") return;
+
+            $("#cur_rule_plant").removeClass("invisible");
+
+            // $.ajax({
+            //     url: "/api/proofread/getrule", method: "GET", dataType: "json",
+            //     success: (result) => {
+            //         $("#rule_list").data("setting", result);
+            //         for (let n in result) {
+            //             let rule = result[n];
+            //             if (Array.isArray(rule)) continue;
+            //             rule.id = n;
+            //             AddARule(rule);
+            //         }
+            //         UpdateCommonDom(result);
+            //     }
+            // });
         }
 
     </script>
