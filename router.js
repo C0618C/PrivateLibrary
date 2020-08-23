@@ -96,7 +96,7 @@ exports.Init = function (servers, NovelLibrary) {
         });
     }
 
-    {
+    {/** 文件相关的API */
         web.post("/api/fs/dirstatus", urlencodedParser, (req, res) => {
             let curPath = req.body.curPath;
             servers.fileServer.GetDirStatus(curPath).then((status) => {
@@ -130,7 +130,15 @@ exports.Init = function (servers, NovelLibrary) {
             res.send(JSON.stringify({ result: "success" }));
         });
     }
-
+    {/** 校阅相关的API */
+        web.get("/api/proofread/getrule", (req, res) => {
+            res.sendFile(servers.fileServer.PROOFREAD_RULE_PATH);
+        });
+        web.put("/api/proofread/saverule", bodyParser.json({ limit: '2mb' }), (req, res) => {
+            servers.fileServer.SaveProofread(req.body);
+            res.send(JSON.stringify({ "result": "success" }));
+        });
+    }
     {   /** 其它API **/
         web.route("/api/setting/rule")
             .get((req, res) => {

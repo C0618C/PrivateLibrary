@@ -101,10 +101,11 @@ function Info(message, title, delayMS = 0) {
  * 模态窗口
  * @param {*} param0 
  */
-function ShowModalDialog({ title, body, buttons, callback, initfn }) {
+function ShowModalDialog({ title, body, buttons, callback, initfn, size }) {
+    if (!size) size = "";
     let dialog = $(`
     <div class="modal fade" id="modalWin" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable ${size}">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="staticBackdropLabel">${title ? title : ""}</h5>
@@ -130,8 +131,5 @@ function ShowModalDialog({ title, body, buttons, callback, initfn }) {
         callback?.(dialog);
         dialog.remove();
     });
-    /*
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Understood</button>
-    */
+    return dialog;
 }

@@ -5,8 +5,10 @@ const TEMP_FILE_PATH = NOVEL_DOWNLOAD_PATH + "/temp";
 const SOLUTION_DIR_PATH = process.cwd() + "/.sln";
 const RULE_FILE_PATH = SOLUTION_DIR_PATH + "/rule.json";
 const SOLUTION_FILE_PATH = SOLUTION_DIR_PATH + "/index.json";
-const SYS_SETTING_FILE_PATH = SOLUTION_DIR_PATH + "/setting.json";
-const FONT_DIR_PATH = process.cwd() + "/font";
+const SYS_SETTING_FILE_PATH = SOLUTION_DIR_PATH + "/setting.json";  //系统设置文件
+const FONT_DIR_PATH = process.cwd() + "/font";                      //可用字体目录
+const PROOFREAD_RULE_PATH = SOLUTION_DIR_PATH + "/proofread.json"      //校阅规则文件
+
 
 class Cache {
     static get NOVEL_DOWNLOAD_PATH() { return NOVEL_DOWNLOAD_PATH; }
@@ -16,6 +18,7 @@ class Cache {
     static get SOLUTION_FILE_PATH() { return SOLUTION_FILE_PATH; }
     static get SYS_SETTING_FILE_PATH() { return SYS_SETTING_FILE_PATH; }
     static get FONT_DIR_PATH() { return FONT_DIR_PATH; }
+    static get PROOFREAD_RULE_PATH() { return PROOFREAD_RULE_PATH; }
 
 
     static CacheIndex(novel) {
@@ -123,6 +126,11 @@ class Cache {
 
     static SetSettingConfig(setting) {
         fs.writeFileSync(SYS_SETTING_FILE_PATH, JSON.stringify(setting));
+    }
+
+    //Proofread
+    static SaveProofread(setting) {
+        fs.writeFileSync(PROOFREAD_RULE_PATH, typeof (setting) == "string" ? setting : JSON.stringify(setting));
     }
 
     /**
