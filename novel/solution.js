@@ -1,6 +1,7 @@
 const Cache = require("./cache").Cache;
 const fs = require("fs");
 const Servers = require("../server");
+const Proofread = require("./autoproofread").Proofread;
 
 const solutionCacheFile = process.cwd() + "/.sln/index.json";
 class Solution {
@@ -122,6 +123,8 @@ class Solution {
 
         let content = fs.readFileSync(Cache.GetNovelCachePath(info.title) + "/" + getFile).toString();
 
+        //自动校阅
+        content = Proofread(info.proofread, content);
 
         //置为已读
         let novel = this.GetNoevlIndex(id, true);
@@ -162,6 +165,18 @@ class Solution {
                 Cache.SaveIndexStatus(book);
             }
         });
+    }
+
+    /**
+     * 设置新的校阅规则
+     * @param {*} bookid 
+     * @param {Array} newProofread 
+     */
+    SetProofread(bookid, newProofread) {
+        let book = this.GetItemByID(bookid);
+        book.proofread = newProofread.concat();
+        this.SaveSetting();
+        return true;
     }
 }
 

@@ -248,7 +248,7 @@ function __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTime
 
     if (jobSetting.printPdf) {
         console.log("开始合并PDF文件！！")
-        PDFCreater.Create(jobSetting.chapters, novel.title + "_" + new Date().getTime(), (fileInfo, err) => {  //filename: string; path: string
+        PDFCreater.Create(novel, jobSetting.chapters, novel.title + "_" + new Date().getTime(), (fileInfo, err) => {  //filename: string; path: string
             if (err) { return; }//生成PDF失败了
 
             pdfprinted = true;

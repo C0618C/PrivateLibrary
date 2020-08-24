@@ -129,6 +129,9 @@ class Cache {
     }
 
     //Proofread
+    static GetProofread() {
+        return JSON.parse(fs.readFileSync(PROOFREAD_RULE_PATH).toString());
+    }
     static SaveProofread(setting) {
         fs.writeFileSync(PROOFREAD_RULE_PATH, typeof (setting) == "string" ? setting : JSON.stringify(setting));
     }

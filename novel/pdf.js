@@ -1,8 +1,10 @@
 const PDFDocument = require('pdfkit');
-const pdfSetting = require("./setting").pdf;
 const fs = require('fs');
+const pdfSetting = require("./setting").pdf;
+const Proofread = require("./autoproofread").Proofread;
 
-function CreatePDF(target, newFileName, callback) {
+
+function CreatePDF(bookinfo, target, newFileName, callback) {
     let fileInfo = {
         filename: newFileName + ".pdf",
         path: "book/" + newFileName + '.pdf'
@@ -11,7 +13,7 @@ function CreatePDF(target, newFileName, callback) {
         const newDoc = CreateNewDoc(fileInfo.path);
 
         if (Array.isArray(target)) {
-            MakeFilesToADoc(target, newDoc.doc);
+            MakeFilesToADoc(bookinfo.proofread, target, newDoc.doc);
             console.log("【PDF】所有章节已安排生成");
         }
 
@@ -69,10 +71,13 @@ function CreateNewDoc(filepath, setting) {
     return { doc, stream };
 }
 
-function MakeFilesToADoc(files, doc) {
+function MakeFilesToADoc(proofread, files, doc) {
     setting = pdfSetting.get();
     files.forEach(file => {
         let context = fs.readFileSync(file.filepath).toString();
+        //自动校阅
+        context = Proofread(proofread, context);
+
         doc.text(context, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).addPage();
     });
     doc.end();

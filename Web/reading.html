@@ -92,6 +92,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#" data-toggle="modal" data-target="#SetReading">阅读设置</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="AutoFix">智能校正</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -262,6 +265,8 @@
             });
 
             InitReadingSetting(GetReadingSetting());
+            let bookid = location.pathname.match(/read\/([^/]+)/)[1];
+            $("#AutoFix").on("click", (e) => SetProofread(bookid));
         });
 
         function GetReadingSetting() {
@@ -285,9 +290,10 @@
             pageHtml.push(`<h3 style="font-weight:800;margin:40px auto;">${page.shift()}</h3>`);
 
             page.forEach(p => {
-                if (!/^\s*$|请记住本书|最新域名|笔趣阁|手机阅读|下次打开书架即可看到|全文阅读地址|txt下载地址|推荐本书，谢谢您的支持/.test(p)) pageHtml.push(`<p>${p}</p>`);
-                //else pageHtml.push(`<p style="background-color:#ffffff;">${p}</p>`);
-                //else console.log("过滤掉的内容：", p);
+                // if (!/^\s*$|请记住本书|最新域名|笔趣阁|手机阅读|下次打开书架即可看到|全文阅读地址|txt下载地址|推荐本书，谢谢您的支持/.test(p)) pageHtml.push(`<p>${p}</p>`);
+                // //else pageHtml.push(`<p style="background-color:#ffffff;">${p}</p>`);
+                // //else console.log("过滤掉的内容：", p);
+                pageHtml.push(`<p>${p}</p>`);
             });
             return pageHtml;
         }
@@ -340,6 +346,8 @@
             $.ajax({
                 url: location.pathname + cpfile, method: "POST", dataType: "json",
                 success: (result) => {
+                    if (result.cid == undefined) return callback();     //没有章节
+
                     let cpt = $("#" + result.cid.replace(".", ""));
                     if (cpt.length == 0) {
                         console.warn("要加载的章节容器没有加入文档！" + cpt.text());

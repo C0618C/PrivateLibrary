@@ -138,6 +138,10 @@ exports.Init = function (servers, NovelLibrary) {
             servers.fileServer.SaveProofread(req.body);
             res.send(JSON.stringify({ "result": "success" }));
         });
+        web.put("/api/proofread/savetobook", bodyParser.json({ limit: '2mb' }), (req, res) => {
+            NovelLibrary.Solution.SetProofread(req.body.id, req.body.proofread);
+            res.send(JSON.stringify({ "result": "success" }));
+        });
     }
     {   /** 其它API **/
         web.route("/api/setting/rule")

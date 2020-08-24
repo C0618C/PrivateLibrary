@@ -73,11 +73,10 @@
     <script type="text/javascript">
         let bookid = location.search.replace("?", "");
         $(() => {
-            Init();
+            Init(InitCurRule);
             $("#add_rule").on("click", () => { AddOrEditRule(null); });
             $("#common_rule").on("click", ".delete_common_rule", DeleteCommonRule);
-
-            InitCurRule();
+            $("#cur_rule").on("click", ".delete_common_rule", DeleteBookRule);
         });
         function AddOrEditRule(item) {
             let dialog = ShowModalDialog({
@@ -177,12 +176,18 @@
             if (!Array.isArray(rulelistData["common"])) rulelistData["common"] = [];
             rulelistData.common.push(id);
             rulelist.data("setting", rulelistData);
-            UpdateCommonDom(rulelistData);
+            UpdateRuleDom(rulelistData.common);
         }
 
-        function UpdateCommonDom(rulelistData) {
-            let dom = $("#common_rule").empty();
-            for (let rid of rulelistData.common) {
+        function UpdateRuleDom(resultarray, type) {
+            let rulelistData = $("#rule_list").data("setting")
+            let dom = type == "book" ? $("#cur_rule").empty() : $("#common_rule").empty();
+            for (let i in resultarray) {
+                let rid = resultarray[i];
+                if (rulelistData[rid] == undefined) {
+                    delete resultarray[i];
+                    continue;
+                }
                 dom.append(`<span id="${rid}" class="badge badge-primary mr-2 p-1" >${rulelistData[rid].memo}<a href="#" class="badge badge-danger ml-2 delete_common_rule" data-id="${rid}">&times;</a></span>`);
             }
         }
@@ -190,6 +195,16 @@
         function AsyncTheRule(callback) {
             $.ajax({
                 url: "/api/proofread/saverule", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify($("#rule_list").data("setting")),
+                success: (result) => {
+                    if (result.result == "success" && callback) callback();
+                }
+            });
+        }
+        function AsyncTheBookRule(setting, callback) {
+            $.ajax({
+                url: "/api/proofread/savetobook", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify({
+                    id: bookid, proofread: setting.proofread
+                }),
                 success: (result) => {
                     if (result.result == "success" && callback) callback();
                 }
@@ -229,11 +244,27 @@
             });
             rulelistData.common = newArray;
             rulelist.data("setting", rulelistData);
-            UpdateCommonDom(rulelistData);
+            UpdateRuleDom(rulelistData.common);
             AsyncTheRule(null);
         }
 
-        function Init() {
+        function DeleteBookRule(e) {
+            let id = $(e.target).data("id");
+
+            let curSetting = $("body").data("book_setting");
+            curSetting.proofread.push(id);
+
+            let newArray = [];
+            curSetting.proofread.forEach(rid => {
+                if (rid != id) newArray.push(rid);
+            });
+            curSetting.proofread = newArray;
+            $("body").data("book_setting", curSetting);
+            UpdateRuleDom(newArray, "book");
+            AsyncTheBookRule(curSetting, null);
+        }
+
+        function Init(nextstep) {
             $.ajax({
                 url: "/api/proofread/getrule", method: "GET", dataType: "json",
                 success: (result) => {
@@ -244,7 +275,8 @@
                         rule.id = n;
                         AddARule(rule);
                     }
-                    UpdateCommonDom(result);
+                    UpdateRuleDom(result.common);
+                    if (nextstep) nextstep();
                 }
             });
         }
@@ -254,20 +286,28 @@
             if (bookid == "") return;
 
             $("#cur_rule_plant").removeClass("invisible");
+            ReloadIndex(bookid, false, (result) => {
+                if (!result.proofread) result.proofread = [];
+                UpdateRuleDom(result.proofread, "book");
+                $("body").data("book_setting", result);
+            });
+        }
 
-            // $.ajax({
-            //     url: "/api/proofread/getrule", method: "GET", dataType: "json",
-            //     success: (result) => {
-            //         $("#rule_list").data("setting", result);
-            //         for (let n in result) {
-            //             let rule = result[n];
-            //             if (Array.isArray(rule)) continue;
-            //             rule.id = n;
-            //             AddARule(rule);
-            //         }
-            //         UpdateCommonDom(result);
-            //     }
-            // });
+        function SetForCurBook(form, dialog, isnew) {
+            let setting = GetFromForm(form);
+            if (isnew) {
+                AddARule(setting);
+                AsyncTheRule(() => { });
+            }
+            let curSetting = $("body").data("book_setting");
+            curSetting.proofread.push(setting.id);
+
+            UpdateRule(setting);
+
+            UpdateRuleDom(curSetting.proofread, "book");
+
+            //同步到书籍配置
+            AsyncTheBookRule(curSetting, () => { dialog.modal("hide"); });
         }
 
     </script>
