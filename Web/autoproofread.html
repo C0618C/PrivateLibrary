@@ -293,10 +293,14 @@
             });
         }
 
+
+        /*设置为当前书籍的规则*/
         function SetForCurBook(form, dialog, isnew) {
             let setting = GetFromForm(form);
             if (isnew) {
+                console.log("这是新建规则！！")
                 AddARule(setting);
+                UpdateRule(setting);
                 AsyncTheRule(() => { });
             }
             let curSetting = $("body").data("book_setting");
