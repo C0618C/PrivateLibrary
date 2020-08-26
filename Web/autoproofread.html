@@ -179,6 +179,7 @@
             UpdateRuleDom(rulelistData.common);
         }
 
+        //在规则区显示已使用的规则
         function UpdateRuleDom(resultarray, type) {
             let rulelistData = $("#rule_list").data("setting")
             let dom = type == "book" ? $("#cur_rule").empty() : $("#common_rule").empty();
@@ -188,7 +189,7 @@
                     delete resultarray[i];
                     continue;
                 }
-                dom.append(`<span id="${rid}" class="badge badge-primary mr-2 p-1" >${rulelistData[rid].memo}<a href="#" class="badge badge-danger ml-2 delete_common_rule" data-id="${rid}">&times;</a></span>`);
+                dom.append(`<span id="${rid}" class="badge badge-primary mr-2 p-1 btn" >${rulelistData[rid].memo}<a href="#" class="badge badge-danger ml-2 delete_common_rule" data-id="${rid}">&times;</a></span>`);
             }
         }
 
@@ -297,16 +298,14 @@
         /*设置为当前书籍的规则*/
         function SetForCurBook(form, dialog, isnew) {
             let setting = GetFromForm(form);
+            UpdateRule(setting);
+
             if (isnew) {
-                console.log("这是新建规则！！")
                 AddARule(setting);
-                UpdateRule(setting);
                 AsyncTheRule(() => { });
             }
             let curSetting = $("body").data("book_setting");
             curSetting.proofread.push(setting.id);
-
-            UpdateRule(setting);
 
             UpdateRuleDom(curSetting.proofread, "book");
 
