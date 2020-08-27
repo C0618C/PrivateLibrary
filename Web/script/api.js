@@ -79,6 +79,7 @@ function SetProofread(id) {
             );
         }
     });
+    return false;
 }
 
 /*** UI、通知的工共API ***/

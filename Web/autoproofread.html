@@ -189,7 +189,10 @@
                     delete resultarray[i];
                     continue;
                 }
-                dom.append(`<span id="${rid}" class="badge badge-primary mr-2 p-1 btn" >${rulelistData[rid].memo}<a href="#" class="badge badge-danger ml-2 delete_common_rule" data-id="${rid}">&times;</a></span>`);
+                rulelistData[rid].id = rid;
+                dom.append($(`<span id="${rid}" class="badge badge-primary mr-2 p-1 btn" >${rulelistData[rid].memo}<a href="#" class="badge badge-danger ml-2 delete_common_rule" data-id="${rid}">&times;</a></span>`).on("click", ":not(.delete_common_rule)", () => {
+                    AddOrEditRule(rulelistData[rid]);
+                }));
             }
         }
 
@@ -263,6 +266,7 @@
             $("body").data("book_setting", curSetting);
             UpdateRuleDom(newArray, "book");
             AsyncTheBookRule(curSetting, null);
+            return false;
         }
 
         function Init(nextstep) {
