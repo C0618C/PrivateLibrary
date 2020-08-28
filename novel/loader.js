@@ -12,6 +12,7 @@ const PDFCreater = require("./pdf");
 const { GetTextByURL, GetTempPathByUrl } = require("../dlfromurl");
 const { ChangeRule, GetRule, GetHost } = require("./loader_rule");
 const { QS_GetValueBySetting } = require("./analyzer")
+const { CheckFilesSimilarity } = require("./autoproofread");
 
 let Solution;
 let Servers;
@@ -234,7 +235,13 @@ function __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTime
     let dir = Cache.GetNovelCachePath(novel.title) + "/";
     jobSetting.chapters.forEach(file => {
         file.filepath = dir + file.file;
-    })
+    });
+
+    let result = CheckFilesSimilarity(jobSetting.chapters);
+    if (Array.isArray(result) && result.length > 0) {
+        console.warn("这些章节可能存在重复内容：", result);
+        return;     //TODO: 临时处理，应该发到前端通知
+    }
 
     if (jobSetting.iscompress) {//选择了合并
         console.log("开始合并TXT文件！！")
