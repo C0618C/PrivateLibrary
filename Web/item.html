@@ -159,6 +159,7 @@
             //更新进度
             let pc = msg.done / msg.count * 100;
             $("#processDownload").width(pc.toFixed(2) + "%").show();
+            $("#processCheck").width(0);
             $("#processBar").show();
             let cpItem = $(`[value="${msg.url}"]:checkbox`).closest(".col").find(".uncache_file").removeClass(!msg.isok ? successStyle : failStyle).addClass(msg.isok ? successStyle : failStyle);
         });
@@ -167,7 +168,7 @@
             let pc = msg.done / msg.count * 100;
             $("#processBar").show();
             $("#processCheck").width(pc.toFixed(2) + "%").show();
-            if (pc > 1) $("#processDownload").hide();
+            if (pc > 1) $("#processDownload").width(0).hide();
             if (failurl) {
                 $(`[value="${failurl}"]:checkbox`).closest(".col").find(".hascache").addClass(failStyle);
             }
