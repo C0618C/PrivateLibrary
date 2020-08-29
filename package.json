@@ -1,6 +1,6 @@
 {
   "name": "privatelibrary",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "增强连载小说阅读体验的工具，打造个人书库",
   "main": "start.js",
   "scripts": {

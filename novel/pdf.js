@@ -78,6 +78,9 @@ function MakeFilesToADoc(proofread, files, doc) {
         //自动校阅
         context = Proofread(proofread, context);
 
+        //加到大纲里
+        doc.outline.addItem(file.title);
+
         doc.text(context, setting.paddingX, setting.paddingY, { width: setting.pageWidth }).addPage();
     });
     doc.end();
