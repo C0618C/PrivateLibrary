@@ -89,10 +89,14 @@ exports.Init = function (servers, NovelLibrary) {
             NovelLibrary.Loader.DownLoadOneChapter(req.body.id, req.body.url, cache, req.body.file, req.body.host);
             res.send("started");
         });
-
+        //将某章设置为隐藏
+        web.post("/api/novel/ignorechapter", urlencodedParser, (req, res) => {
+            NovelLibrary.Solution.SetIgnore(req.body.id, req.body.url);
+            res.send(JSON.stringify({ status: "success" }));
+        });
     }
 
-    {
+    {/** 文件相关的API */
         web.post("/api/fs/dirstatus", urlencodedParser, (req, res) => {
             let curPath = req.body.curPath;
             servers.fileServer.GetDirStatus(curPath).then((status) => {
@@ -110,13 +114,13 @@ exports.Init = function (servers, NovelLibrary) {
 
             res.send("ok");
         });
-        web.post("/api/fs/upload", bodyParser.raw({limit:"10mb"}), (req, res) => {
+        web.post("/api/fs/upload", bodyParser.raw({ limit: "10mb" }), (req, res) => {
             // let curPath = req.body.curPath;
             // servers.fileServer.GetDirStatus(curPath).then((status) => {
             //     res.send(JSON.stringify(status));
             // });
 
-            console.log("准备上传文件",req);
+            console.log("准备上传文件", req);
 
             /*
             https://blog.csdn.net/hbiao68/article/details/105031789/
@@ -126,7 +130,19 @@ exports.Init = function (servers, NovelLibrary) {
             res.send(JSON.stringify({ result: "success" }));
         });
     }
-
+    {/** 校阅相关的API */
+        web.get("/api/proofread/getrule", (req, res) => {
+            res.sendFile(servers.fileServer.PROOFREAD_RULE_PATH);
+        });
+        web.put("/api/proofread/saverule", bodyParser.json({ limit: '2mb' }), (req, res) => {
+            servers.fileServer.SaveProofread(req.body);
+            res.send(JSON.stringify({ "result": "success" }));
+        });
+        web.put("/api/proofread/savetobook", bodyParser.json({ limit: '2mb' }), (req, res) => {
+            NovelLibrary.Solution.SetProofread(req.body.id, req.body.proofread);
+            res.send(JSON.stringify({ "result": "success" }));
+        });
+    }
     {   /** 其它API **/
         web.route("/api/setting/rule")
             .get((req, res) => {

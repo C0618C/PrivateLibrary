@@ -67,6 +67,20 @@ function SendEMail({ title, content, sender, mailto, files, callback, pass }) {
     });
 }
 
+function SetProofread(id) {
+    let dialog = ShowModalDialog({
+        title: "设置规则",
+        size: "modal-xl",
+        body: `<div class="embed-responsive" style="height:500px;"><iframe class="embed-responsive-item" src="/page/autoproofread?${id}"></iframe></div>`,
+        initfn: (dialog) => {
+            let btBar = dialog.find(".modal-footer");
+            btBar.append(
+                $(`<button type="button" class="btn btn-success" data-dismiss="modal" id="btn_save">确定</button>`)
+            );
+        }
+    });
+    return false;
+}
 
 /*** UI、通知的工共API ***/
 function NoticeMessage(message, title, { type, delayMS } = { type: "primary", delayMS: 0 }) {
@@ -101,10 +115,11 @@ function Info(message, title, delayMS = 0) {
  * 模态窗口
  * @param {*} param0 
  */
-function ShowModalDialog({ title, body, buttons, callback, initfn }) {
+function ShowModalDialog({ title, body, buttons, callback, initfn, size }) {
+    if (!size) size = "";
     let dialog = $(`
     <div class="modal fade" id="modalWin" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable ${size}">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="staticBackdropLabel">${title ? title : ""}</h5>
@@ -130,8 +145,5 @@ function ShowModalDialog({ title, body, buttons, callback, initfn }) {
         callback?.(dialog);
         dialog.remove();
     });
-    /*
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Understood</button>
-    */
+    return dialog;
 }

@@ -10,7 +10,7 @@ let DirToMake = [
 ]
 DirToMake.forEach(dir => {
     if (!fs.existsSync(dir)) {
-        console.log("创建下载文件及临时目录", dir);
+        console.log("创建必要的运行目录：", dir);
         fs.mkdirSync(dir);
     }
 })
@@ -23,7 +23,11 @@ if (!Cache.CheckFile(Cache.SOLUTION_FILE_PATH)) {
     console.log("创建书库记录文件：", Cache.SOLUTION_FILE_PATH)
     fs.writeFileSync(Cache.SOLUTION_FILE_PATH, "[]");
 }
+if (!Cache.CheckFile(Cache.PROOFREAD_RULE_PATH)) {
+    console.log("创建校阅规则文件：", Cache.PROOFREAD_RULE_PATH)
+    fs.writeFileSync(Cache.PROOFREAD_RULE_PATH, "{}");
+}
 
 
 
-console.warn("运行环境初始化完成！！，可用 node start.js 运行程序。");
+console.warn("运行环境初始化完成！！可用 node start.js 运行程序。");

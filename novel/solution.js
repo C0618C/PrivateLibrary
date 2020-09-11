@@ -1,6 +1,7 @@
 const Cache = require("./cache").Cache;
 const fs = require("fs");
 const Servers = require("../server");
+const Proofread = require("./autoproofread").Proofread;
 
 const solutionCacheFile = process.cwd() + "/.sln/index.json";
 class Solution {
@@ -85,6 +86,11 @@ class Solution {
         return "none";
     }
 
+    /**
+     * 获取某个书籍的目录信息
+     * @param {*} id 书籍ID
+     * @param {*} isUseCache 是否从缓存/记录里获取（否将重新抓取目录信息)
+     */
     GetNoevlIndex(id, isUseCache) {
         let novel = this.GetItemByID(id);
         if (novel == undefined) return null;
@@ -117,6 +123,8 @@ class Solution {
 
         let content = fs.readFileSync(Cache.GetNovelCachePath(info.title) + "/" + getFile).toString();
 
+        //自动校阅
+        content = Proofread(info.proofread, content);
 
         //置为已读
         let novel = this.GetNoevlIndex(id, true);
@@ -142,6 +150,33 @@ class Solution {
                 Cache.SaveIndexStatus(book);
             }
         })
+    }
+
+    /**
+     * 设置某章隐藏
+     * @param {*} bookid 书籍ID
+     * @param {*} url 章节的地址
+     */
+    SetIgnore(bookid, url) {
+        let book = this.GetNoevlIndex(bookid, true);
+        book.chapters.forEach(c => {
+            if (c.url == url) {
+                c.ignore = true;
+                Cache.SaveIndexStatus(book);
+            }
+        });
+    }
+
+    /**
+     * 设置新的校阅规则
+     * @param {*} bookid 
+     * @param {Array} newProofread 
+     */
+    SetProofread(bookid, newProofread) {
+        let book = this.GetItemByID(bookid);
+        book.proofread = newProofread.concat();
+        this.SaveSetting();
+        return true;
     }
 }
 

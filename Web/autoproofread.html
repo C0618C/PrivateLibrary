@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+    <script src="/script/api" type="text/javascript"></script>
+    <title>阅读规则设置</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row container-fluid p-0 m-0">
+            <div class="col-xl-2 col-lg-4 p-0 ">
+                <div class="card">
+                    <div class="card-header">
+                        规则库 <a href="#add" class="float-right  text-truncate" id="add_rule"><img
+                                src="/img/addnew.svg" /> 新建规则</a>
+                    </div>
+                    <div class="card-body p-0" id="rule_list">
+                        <!-- <a href="#${w}" class="list-group-item list-group-item-action text-truncate">${w}</a> -->
+                    </div>
+                </div>
+            </div>
+            <div class="col flex-grow-1">
+                <div class="card">
+                    <div class="card-header">
+                        功能说明
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0">
+                            自动校稿的功能工作原理是：依据【匹配内容】对文章全文进行查找，将匹配部分用【替换内容】进行替换。可以配置全局规则——对所有书同时生效；也能在各个书页配置个性化规则——仅对当前书籍生效。
+                        </blockquote>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        全局规则
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0" id="common_rule">
+
+                        </blockquote>
+                    </div>
+                </div>
+                <div class="card invisible" id="cur_rule_plant">
+                    <div class="card-header">
+                        本书规则
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0" id="cur_rule">
+
+                        </blockquote>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        let bookid = location.search.replace("?", "");
+        $(() => {
+            Init(InitCurRule);
+            $("#add_rule").on("click", () => { AddOrEditRule(null); });
+            $("#common_rule").on("click", ".delete_common_rule", DeleteCommonRule);
+            $("#cur_rule").on("click", ".delete_common_rule", DeleteBookRule);
+        });
+        function AddOrEditRule(item) {
+            let dialog = ShowModalDialog({
+                title: item ? "修改规则" : "新增规则",
+                size: "modal-lg",
+                body: `
+        <form id="setting_form">
+            <input type="hidden" id="rule_id" value="${item ? item.id : Newid()}" />
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">规则描述</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="rule_memo" value="${item ? item.memo : ""}"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">匹配内容</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="rule_regexp"  placeholder="匹配规则，支持正则表达式">${item ? item.regexp : ""}</textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">替换内容</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="rule_content">${item ? item.content : ""}</textarea>
+                </div>
+            </div>
+        </form>`,
+                initfn: (dialog) => {
+                    let btBar = dialog.find(".modal-footer");
+                    btBar.append(
+                        $(`<button type="button" class="btn btn-success" id="btn_save">保存</button>`).on("click", (e) => {
+                            SaveTheRule($(e.target).closest(".modal-content").find("#setting_form"), dialog, item ? false : true);
+                        }),
+                        $(`<button type="button" class="btn btn-primary" id="btn_delete">设为全局规则</button>`).on("click", (e) => {
+                            SetToCommon($(e.target).closest(".modal-content").find("#setting_form"), dialog, item ? false : true);
+                        }),
+                        bookid.length > 0 ? $(`<button type="button" class="btn btn-primary" id="btn_delete">设为本书规则</button>`).on("click", (e) => {
+                            SetForCurBook($(e.target).closest(".modal-content").find("#setting_form"), dialog, item ? false : true);
+                        }) : "",
+                        $(`<button type="button" class="btn btn-danger" id="btn_delete">删除</button>`).on("click", (e) => {
+                            DeleteTheRule($(e.target).closest(".modal-content").find("#setting_form"), dialog, true);
+                        }),
+                        $(`<button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>`)
+                    );
+                }
+            });
+        }
+
+        function Newid() {
+            let chart = "abcdefghijklmnopqrstuvwxyz_0123456789";
+            const idl = 8;
+            let newid = "";
+            while (newid.length < idl) {
+                let r = (Math.random() * 1000000 % (chart.length - 1)).toFixed(0);
+                newid += chart[r];
+            }
+            return "r" + newid;
+        }
+
+        function GetFromForm(form) {
+            let id = form.find("#rule_id").val();
+            let rule_memo = form.find("#rule_memo").val();
+            let rule_regexp = form.find("#rule_regexp").val();
+            let rule_content = form.find("#rule_content").val();
+            return { id, memo: rule_memo, regexp: rule_regexp, content: rule_content };
+        }
+
+
+        function SaveTheRule(form, dialog, isnew) {
+            let setting = GetFromForm(form);
+            if (isnew) AddARule(setting);
+            UpdateRule(setting);
+
+            AsyncTheRule(() => { dialog.modal("hide"); });
+        }
+
+        function DeleteTheRule(form, dialog) {
+            let id = form.find("#rule_id").val();
+
+            $("#rule_list").find(`a[href="#${id}"]`).remove();
+            DeleteRule(id);
+            AsyncTheRule(() => { dialog.modal("hide"); });
+        }
+
+        function SetToCommon(form, dialog, isnew) {
+            let setting = GetFromForm(form);
+
+            if (isnew) AddARule(setting);
+
+            UpdateRule(setting);
+            SetCommon(setting.id);
+            AsyncTheRule(() => { dialog.modal("hide"); });
+        }
+        function SetCommon(id) {
+            let rulelist = $("#rule_list");
+            let rulelistData = rulelist.data("setting");
+            if (!Array.isArray(rulelistData["common"])) rulelistData["common"] = [];
+            rulelistData.common.push(id);
+            rulelist.data("setting", rulelistData);
+            UpdateRuleDom(rulelistData.common);
+        }
+
+        //在规则区显示已使用的规则
+        function UpdateRuleDom(resultarray, type) {
+            let rulelistData = $("#rule_list").data("setting")
+            let dom = type == "book" ? $("#cur_rule").empty() : $("#common_rule").empty();
+            for (let i in resultarray) {
+                let rid = resultarray[i];
+                if (rulelistData[rid] == undefined) {
+                    delete resultarray[i];
+                    continue;
+                }
+                rulelistData[rid].id = rid;
+                dom.append($(`<span id="${rid}" class="badge badge-primary mr-2 p-1 btn" >${rulelistData[rid].memo}<a href="#" class="badge badge-danger ml-2 delete_common_rule" data-id="${rid}">&times;</a></span>`).on("click", () => {
+                    AddOrEditRule(rulelistData[rid]);
+                }));
+            }
+        }
+
+        function AsyncTheRule(callback) {
+            $.ajax({
+                url: "/api/proofread/saverule", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify($("#rule_list").data("setting")),
+                success: (result) => {
+                    if (result.result == "success" && callback) callback();
+                }
+            });
+        }
+        function AsyncTheBookRule(setting, callback) {
+            $.ajax({
+                url: "/api/proofread/savetobook", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify({
+                    id: bookid, proofread: setting.proofread
+                }),
+                success: (result) => {
+                    if (result.result == "success" && callback) callback();
+                }
+            });
+        }
+
+
+        function AddARule({ id, memo, regexp, content }) {
+            let rule = $(`<a href="#${id}" class="list-group-item list-group-item-action text-truncate">${memo}</a>`);
+            rule.on("click", () => {
+                AddOrEditRule({ id, memo, regexp, content });
+            })
+            $("#rule_list").append(rule);
+        }
+
+        function UpdateRule({ id, memo, regexp, content }) {
+            let rulelist = $("#rule_list");
+            let rulelistData = rulelist.data("setting");
+            rulelistData[id] = { memo, regexp, content };
+            rulelist.data("setting", rulelistData);
+        }
+        function DeleteRule(id) {
+            let rulelist = $("#rule_list");
+            let rulelistData = rulelist.data("setting");
+            delete rulelistData[id];
+            rulelist.data("setting", rulelistData);
+        }
+
+        function DeleteCommonRule(e) {
+            let id = $(e.target).data("id");
+
+            let rulelist = $("#rule_list");
+            let rulelistData = rulelist.data("setting");
+            let newArray = [];
+            rulelistData.common.forEach(rid => {
+                if (rid != id) newArray.push(rid);
+            });
+            rulelistData.common = newArray;
+            rulelist.data("setting", rulelistData);
+            UpdateRuleDom(rulelistData.common);
+            AsyncTheRule(null);
+        }
+
+        function DeleteBookRule(e) {
+            let id = $(e.target).data("id");
+            let curSetting = $("body").data("book_setting");
+            curSetting.proofread.push(id);
+
+            let newArray = [];
+            curSetting.proofread.forEach(rid => {
+                if (rid != id) newArray.push(rid);
+            });
+            curSetting.proofread = newArray;
+            $("body").data("book_setting", curSetting);
+            UpdateRuleDom(newArray, "book");
+            AsyncTheBookRule(curSetting, null);
+            e.stopPropagation();
+            return false;
+        }
+
+        function Init(nextstep) {
+            $.ajax({
+                url: "/api/proofread/getrule", method: "GET", dataType: "json",
+                success: (result) => {
+                    $("#rule_list").data("setting", result);
+                    for (let n in result) {
+                        let rule = result[n];
+                        if (Array.isArray(rule)) continue;
+                        rule.id = n;
+                        AddARule(rule);
+                    }
+                    UpdateRuleDom(result.common);
+                    if (nextstep) nextstep();
+                }
+            });
+        }
+
+        function InitCurRule() {
+            let bookid = location.search.replace("?", "");
+            if (bookid == "") return;
+
+            $("#cur_rule_plant").removeClass("invisible");
+            ReloadIndex(bookid, false, (result) => {
+                if (!result.proofread) result.proofread = [];
+                UpdateRuleDom(result.proofread, "book");
+                $("body").data("book_setting", result);
+            });
+        }
+
+
+        /*设置为当前书籍的规则*/
+        function SetForCurBook(form, dialog, isnew) {
+            let setting = GetFromForm(form);
+            UpdateRule(setting);
+
+            if (isnew) {
+                AddARule(setting);
+                AsyncTheRule(() => { });
+            }
+            let curSetting = $("body").data("book_setting");
+            curSetting.proofread.push(setting.id);
+
+            UpdateRuleDom(curSetting.proofread, "book");
+
+            //同步到书籍配置
+            AsyncTheBookRule(curSetting, () => { dialog.modal("hide"); });
+        }
+
+    </script>
+
+</body>
+
+
+</html>

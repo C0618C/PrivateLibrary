@@ -21,17 +21,17 @@
         }
 
         .center {
-          display: flex;
-          place-items: center;
-          justify-content: flex-end;
+            display: flex;
+            place-items: center;
+            justify-content: flex-end;
         }
 
-        .center > * {
-          margin: 0 5px;
+        .center>* {
+            margin: 0 5px;
         }
 
         .form-check label {
-          margin-bottom: 0; 
+            margin-bottom: 0;
         }
 
         #main {
@@ -72,6 +72,9 @@
                     <a class="nav-link" href="#" id="ReloadIndex">更新目录</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="#" id="AutoFix">智能校正</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="#" id="CleanCache">清空缓存</a>
                 </li>
             </ul>
@@ -109,10 +112,10 @@
             <div class="col-sm-12" style="margin-right: 120px;">
                 <div class="form-check align-middle center" style="margin-top: 10px;">
                     <label style="margin-right: 15px;" class="center">
-                      序号区间
-                      <input type="number" style="width: 60px" class="pick_range_num" min="1"/>-
-                      <input type="number" style="width: 60px" class="pick_range_num" min="1"/>
-                      <button type="button" class="btn btn-sm btn-primary" id="bt_pick_range">确定</button>
+                        序号区间
+                        <input type="number" style="width: 60px" class="pick_range_num" min="1" />-
+                        <input type="number" style="width: 60px" class="pick_range_num" min="1" />
+                        <button type="button" class="btn btn-sm btn-primary" id="bt_pick_range">确定</button>
                     </label>
                     <input type="radio" name="click_action" id="ca_1" value="1" checked /><label for="ca_1"
                         title="选中的复选框开始，后面的复选框均会被选中。">从此以后</label>
@@ -135,8 +138,8 @@
         const readedStyle = "alert-info text-info hascache";
         const failStyle = "alert-danger text-danger hascache";
         const PICK_TYPE = {
-          PICK_AFTER_ALL: 1,
-          PICK_SINGLE: 2,
+            PICK_AFTER_ALL: 1,
+            PICK_SINGLE: 2,
         }
         var socket = io();
         socket.on('Novel/LoadIndex/Finish', function (id, novel) {
@@ -148,7 +151,7 @@
             if (curID !== id) return;
             $('#bt_download').prop('disabled', false);
             Success(`已保存：${new_file_name ? new_file_name : novel.title} 所有任务已完成！`);
-        }); 
+        });
         socket.on('Novel/Downloading', function (id, msg) {
             let curID = $("#id").val();
             if (curID !== id) return;
@@ -156,6 +159,7 @@
             //更新进度
             let pc = msg.done / msg.count * 100;
             $("#processDownload").width(pc.toFixed(2) + "%").show();
+            $("#processCheck").width(0);
             $("#processBar").show();
             let cpItem = $(`[value="${msg.url}"]:checkbox`).closest(".col").find(".uncache_file").removeClass(!msg.isok ? successStyle : failStyle).addClass(msg.isok ? successStyle : failStyle);
         });
@@ -164,7 +168,7 @@
             let pc = msg.done / msg.count * 100;
             $("#processBar").show();
             $("#processCheck").width(pc.toFixed(2) + "%").show();
-            if (pc > 1) $("#processDownload").hide();
+            if (pc > 1) $("#processDownload").width(0).hide();
             if (failurl) {
                 $(`[value="${failurl}"]:checkbox`).closest(".col").find(".hascache").addClass(failStyle);
             }
@@ -193,7 +197,9 @@
             $("#bt_download").on("click", StartDownload);
 
             $("#novel_index").on("click", ".reaload_this_cp", ReloadThisChapter);
+            $("#novel_index").on("click", ".hide_this_cp", IgnoreThisChapter);
 
+            $("#AutoFix").on("click", (e) => SetProofread($("#id").val()));
         });
 
         function InitNovel(novel_setting) {
@@ -206,8 +212,10 @@
             if (!novel_setting.chapters) return;
 
             let indexs = [];
-            let i = 0;
+            let j = 0;
             novel_setting.chapters.forEach((novel, i) => {
+                if (novel.ignore) return;
+                j++;
                 let successStatu = novel.file ? successStyle : "uncache_file";
                 if (novel.readed) successStatu = readedStyle;
                 indexs.push(`
@@ -217,10 +225,10 @@
     <div class="input-group-text ${successStatu}">
       <input type="checkbox" id="cp_${i}" value="${novel.url}" title="${novel.title}">
     </div>
-    <span class="input-group-text ${successStatu}">${i + 1}</span>
+    <span class="input-group-text ${successStatu}">${j}</span>
   </div>
   <label for="cp_${i}" class="form-control c_name ${successStatu}">${novel.title}</label>
-  <div class="input-group-prepend">
+  <div class="input-group-append">
     <div class="input-group-text ${successStatu}">
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <path fill-rule="evenodd" d="M8.837 1.626c-.246-.835-1.428-.835-1.674 0l-.094.319A1.873 1.873 0 0 1 4.377 3.06l-.292-.16c-.764-.415-1.6.42-1.184 1.185l.159.292a1.873 1.873 0 0 1-1.115 2.692l-.319.094c-.835.246-.835 1.428 0 1.674l.319.094a1.873 1.873 0 0 1 1.115 2.693l-.16.291c-.415.764.42 1.6 1.185 1.184l.292-.159a1.873 1.873 0 0 1 2.692 1.116l.094.318c.246.835 1.428.835 1.674 0l.094-.319a1.873 1.873 0 0 1 2.693-1.115l.291.16c.764.415 1.6-.42 1.184-1.185l-.159-.291a1.873 1.873 0 0 1 1.116-2.693l.318-.094c.835-.246.835-1.428 0-1.674l-.319-.094a1.873 1.873 0 0 1-1.115-2.692l.16-.292c.415-.764-.42-1.6-1.185-1.184l-.291.159A1.873 1.873 0 0 1 8.93 1.945l-.094-.319zm-2.633-.283c.527-1.79 3.065-1.79 3.592 0l.094.319a.873.873 0 0 0 1.255.52l.292-.16c1.64-.892 3.434.901 2.54 2.541l-.159.292a.873.873 0 0 0 .52 1.255l.319.094c1.79.527 1.79 3.065 0 3.592l-.319.094a.873.873 0 0 0-.52 1.255l.16.292c.893 1.64-.902 3.434-2.541 2.54l-.292-.159a.873.873 0 0 0-1.255.52l-.094.319c-.527 1.79-3.065 1.79-3.592 0l-.094-.319a.873.873 0 0 0-1.255-.52l-.292.16c-1.64.893-3.433-.902-2.54-2.541l.159-.292a.873.873 0 0 0-.52-1.255l-.319-.094c-1.79-.527-1.79-3.065 0-3.592l.319-.094a.873.873 0 0 0 .52-1.255l-.16-.292c-.892-1.64.902-3.433 2.541-2.54l.292.159a.873.873 0 0 0 1.255-.52l.094-.319z"/>
@@ -229,6 +237,7 @@
         <div class="dropdown-menu">
             <a class="dropdown-item" href="/read/${novel_setting.id}/${novel.file}/" style="display:${novel.file ? "inherit" : "none"};">从这开始连读</a>
             <a class="dropdown-item reaload_this_cp" href="#" data-url="${novel.url}" data-id="${novel_setting.id}" data-file="${novel.file}">重新下载本章</a>
+            <a class="dropdown-item hide_this_cp" data-id="${novel_setting.id}" data-url="${novel.url}" href="#">隐藏本章</a>
             <div role="separator" class="dropdown-divider"></div>
             <a class="dropdown-item" href="${/^https?/.test(novel.url) ? novel.url : host + novel.url}" target="_blank">查看来源</a>
         </div>
@@ -241,19 +250,19 @@
 
             InitCheckBox();
             $('#bt_clear').click(() => {
-              $('input:checkbox').each(function (e) { 
-                $(this).prop('checked', false)
-              })
+                $('input:checkbox').each(function (e) {
+                    $(this).prop('checked', false)
+                })
             })
             $('#bt_pick_range').click(() => {
-              const num = $('.pick_range_num').map((i, e) => Number($(e).val())).toArray();
-              pick($('input:checkbox').slice(num[0]-1, num[1]))
-              $('.pick_range_num').val('');
+                const num = $('.pick_range_num').map((i, e) => Number($(e).val())).toArray();
+                pick($('input:checkbox').slice(num[0] - 1, num[1]))
+                $('.pick_range_num').val('');
             })
         }
 
         function pick($checkboxList) {
-          $checkboxList.each((i, e) => $(e).prop('checked', true))
+            $checkboxList.each((i, e) => $(e).prop('checked', true))
         }
 
         function InitCheckBox() {
@@ -321,7 +330,24 @@
                 success: (result) => {
                     //if (callback) callback(result);
                 }
-            })
+            });
+        }
+
+        //排除指定章节
+        function IgnoreThisChapter(element) {
+            let obj = $(element.target);
+            let id = obj.data("id");//bookid;
+            let url = obj.data("url");
+
+            $.ajax({
+                url: "/api/novel/ignorechapter", dataType: "json",
+                data: { id: id, url: url, }, method: "POST",
+                success: (result) => {
+                    //if (callback) callback(result);
+                    if (result.status == "success") obj.closest(".one_chapter").remove();
+                }
+            });
+            element.preventDefault();
         }
     </script>
 </body>
