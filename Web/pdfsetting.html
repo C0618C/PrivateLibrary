@@ -26,7 +26,11 @@
                     <div class="card bg-light">
                         <div class="card-body">
                             <button type="reset" class="btn btn-primary" id="btn_default">恢复默认</button>
-                            <button type="button" class="btn btn-success" id="btn_save">保存</button>
+                            <button type="button" class="btn btn-success" 
+                                data-placement="bottom"
+                                data-toggle="popover" data-trigger="focus"
+                                data-content="保存成功" 
+                                id="btn_save">保存</button>
                             <button type="button" class="btn btn-primary" id="btn_view">生成预览</button>
                             <button type="button" class="btn btn-primary" id="btn_sendfile">发送预览到Kindle</button>
                         </div>
@@ -120,6 +124,7 @@
         $(() => {
 
             $("#btn_save").on("click", UpdateSetting);
+            $("#font_family").on("change", CreateAView);
             $("#btn_view").on("click", CreateAView);
             $("#btn_sendfile").on("click", SendTheView);
             $.ajax({
@@ -131,6 +136,9 @@
                     });
 
                     GetSetting();
+                    if ($('#font_family').val()) {
+                        CreateAView();
+                    }
                 }
             });
         });
@@ -159,8 +167,11 @@
             $.ajax({
                 url: "/api/setting/pdf", method: "PUT", dataType: "json", contentType: 'application/json', data: JSON.stringify(setting),
                 success: (result) => {
-                    //if (callback) callback(result);
-                    console.log(result);
+                    if (result === true) {
+                        $('#btn_save').popover({
+                            trigger: 'focus'
+                        })
+                    }
                 }
             });
         }
