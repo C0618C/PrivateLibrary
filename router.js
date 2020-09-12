@@ -2,7 +2,7 @@ const bodyParser = require('body-parser');
 
 const fs = require('fs')
 const WebRoot = __dirname + "/Web";
-const multer  = require('multer')
+const multer = require('multer')
 let _servers;
 
 exports.Init = function (servers, NovelLibrary) {
@@ -118,16 +118,27 @@ exports.Init = function (servers, NovelLibrary) {
 
         const fontStorage = multer.diskStorage({
             destination: function (req, file, cb) {
-              cb(null, servers.fileServer.getFontDir())
+                cb(null, servers.fileServer.getFontDir())
             },
             filename: function (req, file, cb) {
-              cb(null, file.originalname)
+                cb(null, file.originalname)
             }
-          })
+        })
         const fontUpload = multer({ storage: fontStorage })
         web.post("/api/fs/upload", fontUpload.single('file'), (req, res) => {
 
             res.json({ result: "success" });
+        });
+        web.delete("/api/fs/upload/:fileName", (req, res) => {
+            try {
+                const { fileName } = req.params
+                fs.unlinkSync(`${servers.fileServer.getFontDir()}/${fileName}`)
+                res.json({result: 'success'})
+            } catch(e) {
+                console.error(e)
+                res.json({result: 'error'})
+            }
+
         });
     }
     {/** 校阅相关的API */

@@ -65,7 +65,7 @@
                 result.forEach(element => {
                     let fontName = btoa(encodeURIComponent(element));
                     fontName = "fn" + fontName.replace(/[=+]/g, "");
-                    fontSel.append(`<div class="card" style="width:22em;">
+                    fontSel.append(`<div class="card" style="width:22em;min-height: 405px;">
   <div class="card-header">${element}</div>
   <div class="card-body" style="font-family:${fontName};">
     <h5 class="card-title">${element}</h5>
@@ -75,7 +75,7 @@
     <p class="card-text">春如旧。人空瘦。泪痕红浥鲛绡透。</p>
     <p class="card-text">桃花落。闲池阁。山盟虽在，锦书难托。</p>
     <p class="card-text">莫莫莫。</p>
-    <button class="btn btn-danger delete_font" >删除</button>
+    <button class="btn btn-danger delete_font" data-file-name="${element}" style="font-family: initial;">删除</button>
   </div>
 </div>`);
                 });
@@ -168,7 +168,21 @@
         }
 
         function DeleteFont(event) {
-            console.log("todo:执行删除字体")
+            $.ajax({
+                url: `/api/fs/upload/${$(this).data('fileName')}`,
+                type: "delete",
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data.result === 'success') {
+                        fetchFonts();
+                        alert('删除成功');
+                    }
+                },
+                error: function (e) {
+                    console.error(e)
+                }
+            });
         }
     </script>
 </body>
