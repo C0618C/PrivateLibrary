@@ -1,7 +1,8 @@
 const bodyParser = require('body-parser');
 
+const fs = require('fs')
 const WebRoot = __dirname + "/Web";
-
+const multer  = require('multer')
 let _servers;
 
 exports.Init = function (servers, NovelLibrary) {
@@ -114,20 +115,19 @@ exports.Init = function (servers, NovelLibrary) {
 
             res.send("ok");
         });
-        web.post("/api/fs/upload", bodyParser.raw({ limit: "10mb" }), (req, res) => {
-            // let curPath = req.body.curPath;
-            // servers.fileServer.GetDirStatus(curPath).then((status) => {
-            //     res.send(JSON.stringify(status));
-            // });
 
-            console.log("准备上传文件", req);
+        const fontStorage = multer.diskStorage({
+            destination: function (req, file, cb) {
+              cb(null, servers.fileServer.getFontDir())
+            },
+            filename: function (req, file, cb) {
+              cb(null, file.originalname)
+            }
+          })
+        const fontUpload = multer({ storage: fontStorage })
+        web.post("/api/fs/upload", fontUpload.single('file'), (req, res) => {
 
-            /*
-            https://blog.csdn.net/hbiao68/article/details/105031789/
-            https://www.cnblogs.com/pingfan1990/p/4701355.html
-            */
-
-            res.send(JSON.stringify({ result: "success" }));
+            res.json({ result: "success" });
         });
     }
     {/** 校阅相关的API */
