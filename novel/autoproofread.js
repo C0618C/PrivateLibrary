@@ -34,7 +34,7 @@ function CheckFilesSimilarity(items) {  //传入章节地址，校验是否存�
     for (let i = 0; i < items.length; i++) {
         let curText = fs.readFileSync(items[i].filepath).toString();
         if (curText.length < 50) {
-            console.log("文件过短，可能存在问题：", item[i], curText);
+            console.log("文件过短，可能存在问题：", items[i], curText);
             continue;
         }
         let p1 = Math.floor(curText.length / 4);
@@ -52,6 +52,13 @@ function CheckFilesSimilarity(items) {  //传入章节地址，校验是否存�
             if (c >= 2) {                   //可能重复的只有其中一半 不保证三段完全都找到
                 result.push({ a: items[i], b: items[j] });
             }
+        }
+
+        //判断文章是否正常结束了
+        let lastText = curText.substr(-40).trim();
+        if (!/[。！？”.!?’……]|本章完|更新|感谢|推荐|本书新?盟主?|上架|爆发|月票|加更/.test(lastText)) {
+            console.log("没检测到文章末的结束：", items[i], lastText);
+            console.log("\n");
         }
     }
 

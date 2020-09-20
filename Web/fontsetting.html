@@ -106,8 +106,10 @@
                 return;
             }
             const formData = new FormData();
+            const jobType = "font";
+            formData.append("type", jobType);
             for (let item of filelist) {
-                formData.append(`file`, item, item.name);
+                formData.append(jobType, item, item.name);
             };
             $.ajax({
                 url: "/api/fs/upload",
@@ -131,40 +133,6 @@
                 }
             });
 
-            /*
-              //upload
-    $("#attachmentUploadBtn").click(function (even) {
-        //1、通过HTML表单创建FormData对象 自动注入
-        // var formData = new FormData($("#attachments")[0]);
-
-        //2、从零开始创建FormData对象 手动注入
-        var formData = new FormData();
-        //注入 name=file
-        var files = $("#attachmentInputs input[type='file']");
-        for (var i = 0; i < files.length; i++) {
-            //注意：这里append进去的是File对象，而不是FileList对象
-            formData.append("attachment", files[i].files[0]);
-        }
-        //注入name=text
-        formData.append("applyId", "123456");
-
-        console.log(formData.getAll("attachment"));
-        
-        //执行上传
-        $.ajax({
-            url: ctx + "/attachment/upload2",
-            type: "post",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (data) {
-            },
-            error: function (e) {
-            }
-        });
-    });
-
-            */
         }
 
         function DeleteFont(event) {

@@ -116,27 +116,37 @@ exports.Init = function (servers, NovelLibrary) {
             res.send("ok");
         });
 
-        const fontStorage = multer.diskStorage({
+        const fileStorage = multer.diskStorage({
             destination: function (req, file, cb) {
-                cb(null, servers.fileServer.getFontDir())
+                let saveDir = "";
+                switch (req.body.type) {
+                    case "font": saveDir = servers.fileServer.FONT_DIR_PATH; break;
+                    case "upload_book": saveDir = servers.fileServer.TEMP_FILE_PATH + "/tempbook/" + req.body.bookname; break;
+                }
+                cb(null, saveDir);
             },
             filename: function (req, file, cb) {
                 cb(null, file.originalname)
             }
         })
-        const fontUpload = multer({ storage: fontStorage })
-        web.post("/api/fs/upload", fontUpload.single('file'), (req, res) => {
-
+        const fontUpload = multer({ storage: fileStorage })
+        web.post("/api/fs/upload", fontUpload.fields([
+            { name: 'font', maxCount: 9999 },                  //上传字体
+            { name: 'upload_book', maxCount: 9999 }            //上传的图书
+        ]), (req, res) => {
+            if (req.body.type == "upload_book") {     //上传图书成功后：记录书籍、分割章节、转移存放、清理中间文件
+                console.log("TODO: 上传图书成功后：记录书籍、分割章节、转移存放、清理中间文件");
+            }
             res.json({ result: "success" });
         });
         web.delete("/api/fs/upload/:fileName", (req, res) => {
             try {
                 const { fileName } = req.params
-                fs.unlinkSync(`${servers.fileServer.getFontDir()}/${fileName}`)
-                res.json({result: 'success'})
-            } catch(e) {
+                fs.unlinkSync(`${servers.fileServer.FONT_DIR_PATH}/${fileName}`)
+                res.json({ result: 'success' })
+            } catch (e) {
                 console.error(e)
-                res.json({result: 'error'})
+                res.json({ result: 'error' })
             }
 
         });

@@ -148,10 +148,6 @@ class Cache {
         }
         return result;
     }
-
-    static getFontDir() {
-        return FONT_DIR_PATH;
-    }
 }
 
 function deepObjectMerge(FirstOBJ, SecondOBJ) { // 深度合并对象
