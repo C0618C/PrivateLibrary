@@ -81,6 +81,20 @@ function SetProofread(id) {
     });
     return false;
 }
+function UploadBook() {
+    let dialog = ShowModalDialog({
+        title: "导入书籍",
+        size: "modal-xl",
+        body: `<div class="embed-responsive" style="height:500px;"><iframe class="embed-responsive-item" src="/page/import"></iframe></div>`,
+        initfn: (dialog) => {
+            let btBar = dialog.find(".modal-footer");
+            btBar.append(
+                $(`<button type="button" class="btn btn-success" data-dismiss="modal" id="btn_save">确定</button>`)
+            );
+        }
+    });
+    return dialog;
+}
 
 /*** UI、通知的工共API ***/
 function NoticeMessage(message, title, { type, delayMS } = { type: "primary", delayMS: 0 }) {

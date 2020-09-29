@@ -55,6 +55,9 @@
                     <div class="input-group-append" style="width: 80px;">
                         <button class="btn btn-outline-secondary btn-block" type="button" id="button-addon2">载入</button>
                     </div>
+                    <div class="input-group-append" style="width: 80px;">
+                        <button class="btn btn-outline-secondary btn-block" type="button" id="button-addon3">导入</button>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-3">
@@ -80,6 +83,8 @@
                 loading_index_url = $('#url').val()
                 socket.emit('Novel/LoadIndex', loading_index_url);
             });
+
+            $('#button-addon3').click(UploadBook);
 
             socket.on('Novel/LoadIndex/Finish', function (msg) {
                 LoadSolution();

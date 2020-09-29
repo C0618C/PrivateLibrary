@@ -56,7 +56,7 @@ function CheckFilesSimilarity(items) {  //传入章节地址，校验是否存�
 
         //判断文章是否正常结束了
         let lastText = curText.substr(-40).trim();
-        if (!/[。！？”.!?’……]|本章完|更新|感谢|推荐|本书新?盟主?|上架|爆发|月票|加更/.test(lastText)) {
+        if (!/([。！？”.!?’……]$)|本章完|更新|感谢|推荐|本书新?盟主?|上架|爆发|月票|加更/.test(lastText)) {
             console.log("没检测到文章末的结束：", items[i], lastText);
             console.log("\n");
         }
