@@ -38,9 +38,9 @@ function CheckFilesSimilarity(items) {  //传入章节地址，校验是否存�
             continue;
         }
         let p1 = Math.floor(curText.length / 4);
-        let p2 = Math.floor(curText.length / 3);
+        let p2 = Math.min(Math.floor(curText.length / 3) + Math.ceil(Math.random() * 100), curText.length - p1 * 2);
         let p3 = Math.abs(curText.length - p1);
-        let idxText = [curText.substr(p1, 30), curText.substr(p2, 30), curText.substr(p3, 30)];
+        let idxText = [curText.substr(p1, 30), curText.substr(p2, 30), curText.substr(p3, 30)];     //抽检用的三段文本
 
         for (let j = i + 1; j < items.length; j++) {
             let ckText = fs.readFileSync(items[j].filepath).toString();
@@ -56,7 +56,7 @@ function CheckFilesSimilarity(items) {  //传入章节地址，校验是否存�
 
         //判断文章是否正常结束了
         let lastText = curText.substr(-40).trim();
-        if (!/[。！？”.!?’……]|本章完|更新|感谢|推荐|本书新?盟主?|上架|爆发|月票|加更/.test(lastText)) {
+        if (!/[。！？”.!?’……]|本章完|更新|感谢|推荐|本书新?盟主?|上架|爆发|月票|加更|待续/.test(lastText)) {
             console.log("没检测到文章末的结束：", items[i], lastText);
             console.log("\n");
         }
