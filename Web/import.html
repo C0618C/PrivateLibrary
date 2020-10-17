@@ -14,6 +14,18 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"
         integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
         crossorigin="anonymous"></script>
+    <style>
+        .placeholder {
+            margin: 20px;
+            border: 3px dashed #e6e6e6;
+            min-height: 350px;
+            padding-top: 148px;
+            text-align: center;
+            color: #cccccc;
+            font-size: 18px;
+            position: relative;
+        }
+    </style>
     <script src="/script/api" type="text/javascript"></script>
     <title>阅读规则设置</title>
 </head>
@@ -29,6 +41,13 @@
             <div class="carousel-inner">
                 <div class="carousel-item active">
                     请选择需要导入的文件/文件夹
+                    <div id="dndArea" class="placeholder">
+                        <div id="filePicker" class="webuploader-container">
+                            <label class="btn btn-primary" href="#" role="button" for="tfile">点击选择文件</label>
+                            <input type="file" id="tfile" class="form-control-file" multiple="multiple" accept="text/*" style="display:none;">
+                        </div>
+                        <p>或将文件/文件夹拖到这里</p>
+                    </div>
                 </div>
                 <div class="carousel-item">
                     设置导入参数
@@ -41,7 +60,8 @@
         </div>
     </div>
     <div class="modal-footer fixed-bottom">
-        <a class="btn btn-primary" href="#carouselExampleIndicators" role="button" data-slide="prev" style="display:none;">上一步</a>
+        <a class="btn btn-primary" href="#carouselExampleIndicators" role="button" data-slide="prev"
+            style="display:none;">上一步</a>
         <a class="btn btn-primary" href="#carouselExampleIndicators" role="button" data-slide="next">下一步</a>
 
         <button type="button" class="btn btn-success" id="btn_save" disabled>完 成</button>
