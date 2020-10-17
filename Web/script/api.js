@@ -87,10 +87,7 @@ function UploadBook() {
         size: "modal-xl",
         body: `<div class="embed-responsive" style="height:500px;"><iframe class="embed-responsive-item" src="/page/import"></iframe></div>`,
         initfn: (dialog) => {
-            let btBar = dialog.find(".modal-footer");
-            btBar.append(
-                $(`<button type="button" class="btn btn-success" data-dismiss="modal" id="btn_save">确定</button>`)
-            );
+            dialog.find(".modal-footer").remove();
         }
     });
     return dialog;

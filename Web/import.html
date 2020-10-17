@@ -20,11 +20,40 @@
 
 <body>
     <div class="container-fluid">
+        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="height: 400px;">
+            <ol class="carousel-indicators" style="color:red;">
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+            </ol>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    请选择需要导入的文件/文件夹
+                </div>
+                <div class="carousel-item">
+                    设置导入参数
+                </div>
+                <div class="carousel-item">
+                    预览
+                </div>
+            </div>
 
+        </div>
+    </div>
+    <div class="modal-footer fixed-bottom">
+        <a class="btn btn-primary" href="#carouselExampleIndicators" role="button" data-slide="prev" style="display:none;">上一步</a>
+        <a class="btn btn-primary" href="#carouselExampleIndicators" role="button" data-slide="next">下一步</a>
+
+        <button type="button" class="btn btn-success" id="btn_save" disabled>完 成</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            setTimeout(() => $("#carouselExampleIndicators").carousel('pause'), 500);
+        })
+
+    </script>
 
 
 </body>
