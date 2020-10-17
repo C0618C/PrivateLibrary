@@ -5,6 +5,16 @@ const Router = require("./router");
 const Cache = require("./novel/cache");
 const SMTP = require("./smtp");
 
+var projpackage = require('./package.json');
+console.log(`
+====================================================
+                ${projpackage.name.toUpperCase()}
+                        \x1B[44mv${projpackage.version}\x1B[0m
+====================================================
+
+`);
+
+
 
 //初始化服务器
 let webServer = Express();
@@ -27,7 +37,7 @@ exports.InitMailServer = (setting) => {
     servers.MailServer.Init(setting);
 }
 
-httpServer.listen(8899, (...x) => { console.log("已启动服务，请访问 http://localhost:8899", ...x) });
+httpServer.listen(8899, (...x) => { console.log("已启动服务，请访问 \x1B[32m http://localhost:8899 \x1B[0m", ...x) });
 
 console.log("server.js")
 exports.servers = servers;

@@ -174,6 +174,8 @@ function __R1_DownTheUrlAndCacheFiles(novel, chapters, jobSetting, retryTimes) {
                     GetIndexSetting(msg.cpStting, jobSetting.curIndex).file = msg.file;
                     GetIndexSetting(msg.cpStting, jobSetting).file = msg.file;
                     jobSetting.jobDoneCount++;
+
+                    Cache.CacheIndex(jobSetting.curIndex);       //保存最新章节信息——每爬到一章就记录一章
                 } else {
                     chapters.push(msg.cpStting);
                 }
@@ -226,7 +228,7 @@ function __R2_CatchUrlFinishCallback(novel, jobSetting, checkChapters, retryTime
         return;
     }
 
-    Cache.CacheIndex(jobSetting.curIndex);       //保存最新章节信息
+    // Cache.CacheIndex(jobSetting.curIndex);       //保存最新章节信息
 
     let compressed = false;         //已合并TXT
     let pdfprinted = false;         //已合并PDF
@@ -399,8 +401,8 @@ function CombineFiles(novel, callback) {
 
 /**
  * 根据现有章节信息，找到已登记的章节信息
- * @param {*} chapterSetting 
- * @param {*} curIndex 
+ * @param {*} chapterSetting 需要寻找的某章配置信息
+ * @param {*} curIndex 当前的目录配置
  */
 function GetIndexSetting(chapterSetting, curIndex) {
     let curChapterSetting = null;   //已记录的文章章节信息
