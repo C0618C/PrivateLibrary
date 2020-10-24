@@ -227,6 +227,7 @@
                 let scrollTop = document.documentElement.scrollTop;     //滚动上去的高度
 
                 const span = 80;        //预留的高度
+                if ($("#novel_nav .active")[0]) $("#novel_nav .active")[0].scrollIntoView({ behavior: "auto", block: "center" });
 
                 if (isRuning) return;
 
@@ -290,9 +291,6 @@
             pageHtml.push(`<h3 style="font-weight:800;margin:40px auto;">${page.shift()}</h3>`);
 
             page.forEach(p => {
-                // if (!/^\s*$|请记住本书|最新域名|笔趣阁|手机阅读|下次打开书架即可看到|全文阅读地址|txt下载地址|推荐本书，谢谢您的支持/.test(p)) pageHtml.push(`<p>${p}</p>`);
-                // //else pageHtml.push(`<p style="background-color:#ffffff;">${p}</p>`);
-                // //else console.log("过滤掉的内容：", p);
                 pageHtml.push(`<p>${p}</p>`);
             });
             return pageHtml;

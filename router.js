@@ -121,7 +121,12 @@ exports.Init = function (servers, NovelLibrary) {
                 let saveDir = "";
                 switch (req.body.type) {
                     case "font": saveDir = servers.fileServer.FONT_DIR_PATH; break;
-                    case "upload_book": saveDir = servers.fileServer.TEMP_FILE_PATH + "/tempbook/" + req.body.bookname; break;
+                    // case "upload_book": saveDir = servers.fileServer.TEMP_FILE_PATH + "/tempbook/" + req.body.bookname; break;
+                    case "upload_book": saveDir = NovelLibrary.Import.GetImportPath(req.body.bookname); break;
+                }
+
+                if (!fs.existsSync(saveDir)) {
+                    fs.mkdirSync(saveDir, { recursive: true });
                 }
                 cb(null, saveDir);
             },
@@ -135,7 +140,13 @@ exports.Init = function (servers, NovelLibrary) {
             { name: 'upload_book', maxCount: 9999 }            //上传的图书
         ]), (req, res) => {
             if (req.body.type == "upload_book") {     //上传图书成功后：记录书籍、分割章节、转移存放、清理中间文件
-                console.log("TODO: 上传图书成功后：记录书籍、分割章节、转移存放、清理中间文件");
+                let setting = {};
+                for (let s in req.body) {
+                    setting[s] = req.body[s];
+                    if (setting[s] === "false") setting[s] = false;
+                    else if (setting[s] === "true") setting[s] = true;
+                }
+                var rsl = NovelLibrary.Import.ImportBooks(setting);
             }
             res.json({ result: "success" });
         });

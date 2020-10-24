@@ -11,7 +11,7 @@ let DirToMake = [
 DirToMake.forEach(dir => {
     if (!fs.existsSync(dir)) {
         console.log("创建必要的运行目录：", dir);
-        fs.mkdirSync(dir);
+        fs.mkdirSync(dir, { recursive: true });
     }
 })
 

@@ -26,6 +26,10 @@ function CreateTransport(user, pass) {
     return nodemailer.createTransport(smtpTransport(setting));
 }
 
+/**
+ * 
+ * @param {*} files 文件信息 {filename,path}
+ */
 function SendAMail({ callback, title, content, files, mailto, sender, pass }) {
     try {
         console.log("准备发送邮件：", title, content, files)
@@ -37,11 +41,11 @@ function SendAMail({ callback, title, content, files, mailto, sender, pass }) {
         };
 
         //添加附件
-        if (files) {        //NOTE: 这儿回有将服务器任意文件通过邮件发出去的bug，会泄露服务器信息。
-            mailOptions.attachments = [];
-            files.forEach(ff => {
-                mailOptions.attachments.push(ff);
-            });
+        if (files) {        //NOTE: 这儿会有将服务器任意文件通过邮件发出去的bug，会泄露服务器信息。
+            mailOptions.attachments = files.concat();
+            // files.forEach(ff => {
+            //     mailOptions.attachments.push(ff);
+            // });
         }
 
         CreateTransport(sender, pass).sendMail(mailOptions, function (error, info) {

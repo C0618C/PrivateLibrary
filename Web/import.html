@@ -19,38 +19,97 @@
             margin: 20px;
             border: 3px dashed #e6e6e6;
             min-height: 350px;
-            padding-top: 148px;
             text-align: center;
             color: #cccccc;
             font-size: 18px;
             position: relative;
         }
+
+        #dndArea {
+            padding-top: 148px;
+        }
+
+        .dnd-over {
+            border: 3px dashed #999999;
+        }
+
+        .placeholder .book {
+            display: inline-block;
+            width: 150px;
+            height: 200px;
+            border: 1px solid black;
+            margin: 5px 10px;
+            overflow: hidden;
+        }
+
+        .placeholder .book>.title {
+            color: black;
+            margin-top: 40%;
+            text-overflow: ellipsis;
+            word-wrap: break-word;
+        }
+
+        .book:hover {
+            box-shadow: 2px 2px 5px #333333;
+        }
     </style>
     <script src="/script/api" type="text/javascript"></script>
-    <title>阅读规则设置</title>
+    <title>导入书籍</title>
 </head>
 
 <body>
     <div class="container-fluid">
-        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="height: 400px;">
+        <div id="carouselCtrl" class="carousel slide" data-ride="carousel" data-wrap="false" style="height: 400px;">
             <ol class="carousel-indicators" style="color:red;">
-                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+                <li data-target="#carouselCtrl" data-slide-to="0" class="active"></li>
+                <li data-target="#carouselCtrl" data-slide-to="1"></li>
+                <li data-target="#carouselCtrl" data-slide-to="2"></li>
             </ol>
             <div class="carousel-inner">
                 <div class="carousel-item active">
-                    请选择需要导入的文件/文件夹
                     <div id="dndArea" class="placeholder">
                         <div id="filePicker" class="webuploader-container">
-                            <label class="btn btn-primary" href="#" role="button" for="tfile">点击选择文件</label>
-                            <input type="file" id="tfile" class="form-control-file" multiple="multiple" accept="text/*" style="display:none;">
+                            <label class="btn btn-primary btn-lg" href="#" role="button" for="tfile">点击选择文件</label>
+                            <input type="file" id="tfile" class="form-control-file" multiple="multiple" accept="text/*"
+                                style="display:none;">
                         </div>
                         <p>或将文件/文件夹拖到这里</p>
                     </div>
+                    <div id="fileShowArea" class="placeholder" style="display: none;">
+                    </div>
                 </div>
                 <div class="carousel-item">
-                    设置导入参数
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="jobtype" id="jobtype1" value="option1">
+                        <label class="form-check-label" for="jobtype1">
+                            直接发送文件到Kindle
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="jobtype" id="jobtype2" value="option2">
+                        <label class="form-check-label" for="jobtype2">
+                            导入到书架，并按章节拆分（仅限txt文件）
+                        </label>
+                    </div>
+                    <div class="" style="margin-top: 20px;display: none;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="import_type" id="import_type1"
+                                value="option1">
+                            <label class="form-check-label" for="import_type1">
+                                所有文件合并到同一本书中，各个文件名为章节标题
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="import_type" id="import_type2"
+                                value="option2" checked>
+                            <label class="form-check-label" for="import_type2">
+                                所有文件合并到同一本书中，章节标题按规则分析
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    空
                 </div>
                 <div class="carousel-item">
                     预览
@@ -60,18 +119,92 @@
         </div>
     </div>
     <div class="modal-footer fixed-bottom">
-        <a class="btn btn-primary" href="#carouselExampleIndicators" role="button" data-slide="prev"
+        <a class="btn btn-primary" href="#carouselCtrl" role="button" data-slide="prev" id="prev"
             style="display:none;">上一步</a>
-        <a class="btn btn-primary" href="#carouselExampleIndicators" role="button" data-slide="next">下一步</a>
+        <a class="btn btn-primary" href="#carouselCtrl" role="button" data-slide="next" id="next">下一步</a>
 
-        <button type="button" class="btn btn-success" id="btn_save" disabled>完 成</button>
+        <button type="button" class="btn btn-success" id="btn_save">完 成</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
+        var import_setting = {
+            fileList: []                //待上传文档的队列
+            , isSendDirect: true             //直接发送（不拆分章节）
+        }
         $(function () {
-            setTimeout(() => $("#carouselExampleIndicators").carousel('pause'), 500);
-        })
+            var $prev = $("#prev"), $next = $("#next"), $carouselCtrl = $("#carouselCtrl");
+
+            setTimeout(() => $carouselCtrl.carousel('pause'), 500);
+
+            $next.on("click", function () {
+                $prev.show();
+            });
+
+            $("#tfile").on("change", function () {
+                AddFiles(this.files, true);
+            });
+
+
+            $("#btn_save").on("click", function () {
+                var filelist = import_setting.fileList;
+
+                const formData = new FormData();
+                const jobType = "upload_book";
+                formData.append("type", jobType);
+                formData.append("bookname", "temp_name_todo");
+                formData.append("isSpilt", !import_setting.isSendDirect);
+                var myFileList = [];
+                for (let item of filelist) {
+                    var file = item.file;
+                    formData.append(jobType, file, file.name);
+                    myFileList.push(file.name);
+                };
+                formData.append("fileList", myFileList);
+                $.ajax({
+                    url: "/api/fs/upload",
+                    type: "post",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        if (data.result === 'success') {
+                            console.log("sssssss")
+                        } else {
+                            alert('上传失败')
+                        }
+                    },
+                    error: function (e) {
+                        console.error(e)
+                    }
+                });
+
+                console.log()
+            });
+        });
+
+        function AddFiles(files, isNew) {
+            console.log(files);
+            if (files.length == 0) return;
+
+            var showArea = $("#fileShowArea")
+            if (isNew) {
+                $("#dndArea").hide();
+                showArea.show();
+
+                import_setting.fileList = [];
+            }
+
+            var fl = [];
+            for (var f of files) {
+                var temp_file_id = "book_" + Math.random();
+                fl.push(`<div class="book"><div class="toolbar"></div><div class="title">${f.name}</div></div>`);
+                import_setting.fileList.push({
+                    id: temp_file_id, file: f
+                });
+            }
+            showArea.append(fl);
+        }
 
     </script>
 
