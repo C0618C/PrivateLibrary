@@ -76,7 +76,7 @@
                                     <label class="col-sm-2 col-form-label">小说名称</label>
                                     <div class="col-sm-10">
                                         <div class="form-row">
-                                            <div class="col-2">
+                                            <div class="col-2" style="display: none;">
                                                 <select class="form-control" id="index_page_title_type">
                                                     <option disabled>选择器类型</option>
                                                     <option>querySelector</option>
@@ -233,6 +233,41 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">下一页</label>
+                                    <div class="col-sm-10">
+                                        <div class="form-row">
+                                            <div class="col-2">
+                                                <select class="form-control" id="content_page_next_page_type">
+                                                    <option disabled>选择器类型</option>
+                                                    <option>querySelector</option>
+                                                    <option>regexp</option>
+                                                    <option>xpath</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="content_page_next_page">选择器规则</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="选择器规则"
+                                                        id="content_page_next_page" value="">
+                                                </div>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <label class="input-group-text"
+                                                            for="content_page_next_page_url">获取地址</label>
+                                                    </div>
+                                                    <input type="text" class="form-control" placeholder="获取地址"
+                                                        id="content_page_next_page_url" value="fn/text">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </blockquote>
                         </div>
                     </div>
@@ -350,6 +385,11 @@
                     if (rule.content_page.content.selector) $("#content_page_content_selector").val(rule.content_page.content.selector);
                     if (rule.content_page.content.text) $("#content_page_content_text").val(rule.content_page.content.text);
                 }
+                if (rule.content_page.next_page) {
+                    if (rule.content_page.next_page.type) $("#content_page_next_page_type").val(rule.content_page.next_page.type);
+                    if (rule.content_page.next_page.selector) $("#content_page_next_page").val(rule.content_page.next_page.selector);
+                    if (rule.content_page.next_page.url) $("#content_page_next_page_url").val(rule.content_page.next_page.url);
+                }
             }
         }
         function Form2Rule(rules) {
@@ -380,6 +420,11 @@
                         "type": $("#content_page_content_type").val(),
                         "selector": $("#content_page_content_selector").val(),
                         "text": $("#content_page_content_text").val()
+                    },
+                    "next_page": {
+                        "type": $("#content_page_next_page_type").val(),
+                        "selector": $("#content_page_next_page").val(),
+                        "url": $("#content_page_next_page_url").val()
                     }
                 }
             };

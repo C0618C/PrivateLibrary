@@ -9,6 +9,11 @@ else {
         Rules = {};
     }
 }
+
+/**
+ * 更新规则
+ * @param {*} new_rule 
+ */
 function ChangeRule(new_rule) {
     Rules = Object.assign({}, new_rule);
 }
