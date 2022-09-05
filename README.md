@@ -1,4 +1,9 @@
 # PrivateLibrary
+---
+>注意：当前项目已废弃。>v3.0版本已迁移到仓库 [EbookWorkshop-FrontEnd](./../../../EbookWorkshop-FrontEnd)和[EbookWorkshop-API](./../../../EbookWorkshop-API)。    
+>这个v2的写的实在惨不忍睹，改不动，正好学前端顺便重写一个算了。   
+>v3相对于v2针对一些硬伤进行了针对性的开发和优化，应该会有更好的体验。欢迎试用。
+---
 增强连载小说阅读体验的工具，打造个人书库，实现网页到 Kindle 一条龙的服务。  
     
 ## 功能简介
