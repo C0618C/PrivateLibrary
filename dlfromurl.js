@@ -1,6 +1,5 @@
 const fs = require('fs');             //
 const { pipeline } = require('stream');
-const got = require('got');             //请求远程类容
 const Iconv = require('iconv-lite');    //转码相关
 
 const { Cache } = require("./novel/cache");
@@ -12,8 +11,7 @@ const { Cache } = require("./novel/cache");
  * @param {function(text,err)} callback_text_err 下载完后的回调函数，返回下载成的文本或null和错误信息 
  * @param {*} isUseCace 
  */
-function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
-    //console.log("正在爬地址：", url);
+async function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
     let tempFilePath = GetTempPathByUrl(url);
     if (Cache.CheckFile(tempFilePath)) {
         if (isUseCace) {
@@ -23,15 +21,19 @@ function GetTextByURL(url, encoding, callback_text_err, isUseCace = true) {
         }
     }
 
-    pipeline(
+    let { got } = await import('got');             //请求远程类容
+    await pipeline(
         got.stream(url, {
-            timeout: 10000, https: { rejectUnauthorized: false }//rejectUnauthorized 不进行Https的证书校验。
+            timeout: {
+                request: 10000
+            },
+            https: { rejectUnauthorized: false }//rejectUnauthorized 不进行Https的证书校验。
         }),
         Iconv.decodeStream(encoding),
         fs.createWriteStream(tempFilePath),                     //NOTE: 这个临时文件显得有点多余
         (err) => {
             if (err) {                  //进这儿的一般是超时出错
-                //console.error(url, tempFilePath, err.message);
+                console.error(url, tempFilePath, err.message);
                 callback_text_err(null, err);
                 return;
             }

@@ -1,8 +1,14 @@
 # PrivateLibrary
 ---
->注意：当前项目已废弃。>v3.0版本已迁移到仓库 [EbookWorkshop-FrontEnd](./../../../EbookWorkshop-FrontEnd)和[EbookWorkshop-API](./../../../EbookWorkshop-API)。    
+>注意：__当前项目已废弃。__
+>v3.0版本已迁移到仓库 [EbookWorkshop-FrontEnd](./../../../EbookWorkshop-FrontEnd)和[EbookWorkshop-API](./../../../EbookWorkshop-API)。两者名字不同，但功能相似。    
 >这个v2的写的实在惨不忍睹，改不动，正好学前端顺便重写一个算了。   
 >v3相对于v2针对一些硬伤进行了针对性的开发和优化，应该会有更好的体验。欢迎试用。
+>相对于v3，v2的硬伤有：
+> * 程序信息用json存储，运行出错时有概率导致文件清空、信息丢失
+> * 获得的文章用txt存储，不便于后续查阅、分析
+> * 只支持静态爬取，遇到动态渲染的网站无能为力
+> * UI简陋，前端缺乏丰富的元素组装，只能一点点自己开发自己画
 ---
 增强连载小说阅读体验的工具，打造个人书库，实现网页到 Kindle 一条龙的服务。  
     

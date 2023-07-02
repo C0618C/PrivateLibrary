@@ -1,6 +1,6 @@
 {
   "name": "privatelibrary",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "增强连载小说阅读体验的工具，打造个人书库",
   "main": "start.js",
   "scripts": {
@@ -26,14 +26,14 @@
     "node": ">=14"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
-    "express": "^4.17.1",
-    "got": "^11.5.1",
-    "iconv-lite": "^0.6.2",
-    "multer": "^1.4.2",
-    "nodemailer": "^6.4.11",
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.18.2",
+    "got": "^13.0.0",
+    "iconv-lite": "^0.6.3",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.3",
     "nodemailer-smtp-transport": "^2.7.4",
-    "pdfkit": "^0.11.0",
-    "socket.io": "^2.3.0"
+    "pdfkit": "^0.13.0",
+    "socket.io": "^4.7.1"
   }
 }

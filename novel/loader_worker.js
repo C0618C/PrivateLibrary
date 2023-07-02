@@ -63,10 +63,12 @@ function LoadAndCacheTheWeb(setting, callback) {
         return;
     }
 
+
+
     //解释小说，提取正文
     GetTextByURL(/^https?/.test(savedCpSetting.url) ? savedCpSetting.url : host + savedCpSetting.url, rule.encoding, (text, err) => {
-        if (err || text == null) {
-            callback?.(setting, true, true);//出错了 就等等再重启下载
+        if (err || text == null || text == undefined) {
+            callback?.(setting, true, !true);//出错了 就等等再重启下载 出错直接重启会导致无限循环重启
             return;
         }
         let content = ParseContentPage(text, rule.content_page);
